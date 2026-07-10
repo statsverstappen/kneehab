@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Systems Board · Knee Recovery Training Plan</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Knee Plan">
+<meta name="theme-color" content="#17202B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1F4;
+    --card:#FFFFFF;
+    --ink:#17202B;
+    --ink-soft:#4B5866;
+    --line:#D6DDE4;
+    --blue:#2456E6;
+    --blue-soft:#E4EBFD;
+    --green:#1E8A5A;
+    --green-soft:#E2F3EA;
+    --amber:#B87A0E;
+    --amber-soft:#FBF0DA;
+    --red:#C43D3D;
+    --red-soft:#FBE7E7;
+    --mono:'IBM Plex Mono',monospace;
+    --disp:'Barlow Condensed',sans-serif;
+    --body:'Public Sans',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 16px 72px}
+
+  /* ---------- header ---------- */
+  header{border-bottom:3px solid var(--ink);padding-bottom:20px;margin-bottom:26px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:600}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6vw,52px);line-height:1.02;text-transform:uppercase;letter-spacing:.01em;margin:6px 0 10px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+  .meta b{color:var(--ink);font-weight:600}
+
+  h2{font-family:var(--disp);font-weight:700;font-size:26px;text-transform:uppercase;letter-spacing:.02em;margin:38px 0 4px;display:flex;align-items:baseline;gap:10px}
+  h2 .tag{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;padding:3px 8px;border-radius:3px;text-transform:uppercase;transform:translateY(-3px)}
+  .p1 .tag{background:var(--blue-soft);color:var(--blue)}
+  .p2 .tag{background:var(--amber-soft);color:var(--amber)}
+  .p3 .tag{background:var(--green-soft);color:var(--green)}
+  .sub{color:var(--ink-soft);font-size:14px;margin-bottom:14px;max-width:60ch}
+
+  /* ---------- session clock ---------- */
+  .clock{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 18px 14px;margin:18px 0 6px}
+  .clock h3{font-family:var(--disp);font-size:19px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:12px}
+  .bar{display:flex;height:44px;border-radius:6px;overflow:hidden;font-family:var(--mono)}
+  .seg{display:flex;flex-direction:column;justify-content:center;padding:0 8px;color:#fff;min-width:0}
+  .seg span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .seg b{font-size:12px;white-space:nowrap}
+  .ticks{display:flex;font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:5px}
+  .ticks div{text-align:left}
+
+  /* ---------- legend ---------- */
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:16px 0}
+  .lg{border-radius:8px;padding:12px 14px;font-size:13px}
+  .lg h4{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;font-weight:600}
+  .lg.ok{background:var(--green-soft)} .lg.ok h4{color:var(--green)}
+  .lg.cau{background:var(--amber-soft)} .lg.cau h4{color:var(--amber)}
+  .lg.no{background:var(--red-soft)} .lg.no h4{color:var(--red)}
+
+  /* ---------- drill tables ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0}
+  .card-h{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .card-h h3{font-family:var(--disp);font-size:19px;text-transform:uppercase;letter-spacing:.03em}
+  .card-h .freq{font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600;background:#FAFBFC}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap;font-weight:500}
+  td .note{display:block;color:var(--ink-soft);font-size:12px;margin-top:2px}
+  .knee{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;padding:1px 6px;border-radius:3px;margin-top:4px;text-transform:uppercase}
+  .knee.ok{background:var(--green-soft);color:var(--green)}
+  .knee.cau{background:var(--amber-soft);color:var(--amber)}
+
+  /* ---------- rules ---------- */
+  .rules{background:var(--ink);color:#E9EEF3;border-radius:10px;padding:20px 20px 16px;margin-top:34px}
+  .rules h2{color:#fff;margin:0 0 12px}
+  .rules ol{list-style:none;counter-reset:r}
+  .rules li{counter-increment:r;display:flex;gap:14px;padding:9px 0;border-top:1px solid rgba(255,255,255,.14);font-size:13.5px}
+  .rules li::before{content:counter(r,decimal-leading-zero);font-family:var(--mono);color:#8FB0FF;font-size:12px;font-weight:600;padding-top:1px}
+  .rules b{color:#fff}
+
+  /* ---------- movement key ---------- */
+  .movekey{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0 6px}
+  .mk{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 10px 8px;text-align:center}
+  .mk svg{width:100%;height:auto;display:block}
+  .mk h5{font-family:var(--disp);font-size:15px;text-transform:uppercase;letter-spacing:.03em;margin-top:4px}
+  .mk .stat{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;display:inline-block;padding:1px 6px;border-radius:3px;margin-top:3px}
+  .mk .stat.ok{background:var(--green-soft);color:var(--green)}
+  .mk .stat.cau{background:var(--amber-soft);color:var(--amber)}
+  .mk .stat.no{background:var(--red-soft);color:var(--red)}
+  .fig{stroke:var(--ink);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;fill:none}
+  .fig-acc{stroke:var(--blue);stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;fill:none}
+  .hold{fill:var(--line)}
+  .head{fill:var(--ink)}
+
+  /* ---------- weekly layout ---------- */
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0 4px}
+  .day{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 6px;text-align:center;min-width:0}
+  .day h6{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;font-weight:600}
+  .day .act{font-family:var(--disp);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;line-height:1.15;border-radius:5px;padding:6px 2px}
+  .day .act small{display:block;font-family:var(--mono);font-size:8.5px;font-weight:500;letter-spacing:.04em;margin-top:2px;text-transform:none}
+  .act.climb-a{background:var(--blue-soft);color:var(--blue)}
+  .act.climb-b{background:#EFE7FB;color:#7A4FD1}
+  .act.bike{background:var(--amber-soft);color:var(--amber)}
+  .act.rest{background:#F0F2F5;color:var(--ink-soft)}
+  .act[data-target]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .act[data-target]:active{opacity:.75}
+  #ride1,#ride2,#ride3,#endurance,#phase1,#phase2,#phase3{scroll-margin-top:12px}
+  .day.today{border:2px solid var(--blue);padding:7px 5px}
+  .day.today h6{color:var(--blue)}
+
+  /* ---------- plan start / week badge ---------- */
+  .start-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 12px;flex-wrap:wrap}
+  .start-row label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .start-row input{border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-family:var(--body);font-size:13px;background:#FAFBFC;-webkit-appearance:none;appearance:none;height:36px;min-width:0}
+  .start-row .wkbadge{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:600;background:var(--blue-soft);color:var(--blue);padding:5px 11px;border-radius:5px;white-space:nowrap}
+
+  /* ---------- rest timer ---------- */
+  .t-timer{color:var(--blue);text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  #timerbar{position:fixed;left:12px;right:12px;bottom:14px;max-width:836px;margin:0 auto;background:var(--ink);color:#fff;border-radius:10px;padding:13px 18px;display:none;align-items:center;gap:14px;font-family:var(--mono);z-index:50;box-shadow:0 8px 22px rgba(23,32,43,.3);cursor:pointer}
+  #timerbar.on{display:flex}
+  #timerbar.done{background:var(--green)}
+  #timerbar b{font-size:24px;font-weight:600;letter-spacing:.02em}
+  #timerbar span{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+  @media (max-width:560px){.week{grid-template-columns:repeat(4,1fr)}.week .day:nth-child(n+5){grid-column:span 1}}
+
+  /* ---------- collapsible sections ---------- */
+  details.sec>summary{list-style:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  details.sec>summary::-webkit-details-marker{display:none}
+  details.sec>summary h2{user-select:none}
+  details.sec>summary h2::after{content:'+';margin-left:auto;font-family:var(--mono);font-size:22px;font-weight:400;color:var(--ink-soft);transform:translateY(-2px)}
+  details.sec[open]>summary h2::after{content:'\2013'}
+  details.sec>summary:hover h2::after{color:var(--blue)}
+
+  /* ---------- session log ---------- */
+  .log{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-top:14px}
+  .log-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .lf{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .lf label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .lf input[type=date],.lf textarea{border:1px solid var(--line);border-radius:6px;padding:9px 10px;font-family:var(--body);font-size:14px;color:var(--ink);background:#FAFBFC;width:100%}
+  .lf input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;height:41px;text-align:left;display:block;-webkit-text-align:left}
+  .lf input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+  .lf textarea{resize:vertical;min-height:56px}
+  .lf.full{grid-column:1 / -1}
+  .seg-btns{display:flex;gap:6px;flex-wrap:wrap}
+  .seg-btns button{flex:1;min-width:72px;border:1px solid var(--line);background:#FAFBFC;border-radius:6px;padding:9px 4px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+  .seg-btns button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pain-row{display:flex;align-items:center;gap:12px}
+  .pain-row input[type=range]{flex:1;accent-color:var(--blue)}
+  .pain-val{font-family:var(--mono);font-size:16px;font-weight:600;min-width:34px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:5px 0}
+  .save-btn{grid-column:1 / -1;background:var(--ink);color:#fff;border:none;border-radius:6px;padding:13px;font-family:var(--disp);font-size:17px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
+  .save-btn:active{opacity:.85}
+  .log-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 4px}
+  .stat-box{background:#FAFBFC;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+  .stat-box b{display:block;font-family:var(--mono);font-size:19px;font-weight:600}
+  .stat-box span{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .trend{display:flex;align-items:flex-end;gap:3px;height:36px;margin:10px 0 2px}
+  .trend div{flex:1;background:var(--blue);border-radius:2px 2px 0 0;min-height:3px;opacity:.85}
+  .trend div.hi{background:var(--red)}
+  .trend-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .entries{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .entry{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px}
+  .entry-top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-family:var(--mono);font-size:11.5px}
+  .entry-top .d{font-weight:600}
+  .chip{font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:3px}
+  .chip.a{background:var(--blue-soft);color:var(--blue)} .chip.b{background:#EFE7FB;color:#7A4FD1} .chip.r{background:var(--amber-soft);color:var(--amber)}
+  .chip.p{background:#F0F2F5;color:var(--ink-soft)}
+  .chip.pain-lo{background:var(--green-soft);color:var(--green)} .chip.pain-md{background:var(--amber-soft);color:var(--amber)} .chip.pain-hi{background:var(--red-soft);color:var(--red)}
+  .entry .note-txt{color:var(--ink-soft);margin-top:5px;font-size:12.5px}
+  .entry-actions{display:flex;gap:8px;margin-top:8px}
+  .entry-actions button{border:1px solid var(--line);background:#FAFBFC;border-radius:5px;padding:4px 10px;font-family:var(--mono);font-size:10.5px;font-weight:600;cursor:pointer;color:var(--ink-soft)}
+  .entry-actions button.flag-on{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+  .entry-actions button.flag-ok{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+  .log-tools{display:flex;gap:8px;margin-top:14px}
+  .log-tools button{flex:1;border:1px solid var(--line);background:#FAFBFC;border-radius:6px;padding:9px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .empty-log{text-align:center;color:var(--ink-soft);font-size:13px;padding:14px 0;font-family:var(--mono)}
+  @media (max-width:560px){.log-form{grid-template-columns:1fr}.log-stats{grid-template-columns:repeat(3,1fr)}}
+
+  footer{margin-top:26px;font-size:12px;color:var(--ink-soft);font-family:var(--mono);line-height:1.7}
+
+  @media print{body{background:#fff}.wrap{padding:0}.card,.clock{break-inside:avoid}}
+  @media (max-width:560px){
+    th:nth-child(4),td:nth-child(4){display:none}
+    .seg span{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Systems Board · Return-to-Climb Protocol</div>
+  <h1>Knee Recovery Training Plan</h1>
+  <div class="meta">
+    <div>Post-meniscectomy · <b>medial meniscus</b></div>
+    <div>Training days <b>5×/week</b> · 2 climb + 3 bike</div>
+    <div>Climb A <b>strength &amp; drills</b> · Climb B <b>endurance</b> · Bike <b>ERG mode</b></div>
+    <div>Session length <b>~60 min</b></div>
+    <div>Duration <b>8 weeks + maintenance</b></div>
+  </div>
+</header>
+
+<!-- WEEKLY LAYOUT -->
+<div class="week-nav">
+  <div class="start-row">
+    <label for="start-date">Plan start</label>
+    <input type="date" id="start-date">
+    <div class="wkbadge" id="wk-badge">Set start date</div>
+  </div>
+  <p class="sub" style="margin-top:0">Tap a day to jump to its workout. Bike days slot between climbing days so fingers and knee each get recovery; swap days as needed, but keep 48h+ between the two climbing sessions.</p>
+  <div class="week">
+    <div class="day"><h6>Mon</h6><div class="act climb-a" data-target="phase">Climb A<small>strength</small></div></div>
+    <div class="day"><h6>Tue</h6><div class="act bike" data-target="#ride1">Ride 1<small>Z2 aerobic</small></div></div>
+    <div class="day"><h6>Wed</h6><div class="act rest">Rest<small>mobility</small></div></div>
+    <div class="day"><h6>Thu</h6><div class="act climb-b" data-target="#endurance">Climb B<small>endurance</small></div></div>
+    <div class="day"><h6>Fri</h6><div class="act bike" data-target="#ride2">Ride 2<small>sweet spot</small></div></div>
+    <div class="day"><h6>Sat</h6><div class="act bike" data-target="#ride3">Ride 3<small>long Z2</small></div></div>
+    <div class="day"><h6>Sun</h6><div class="act rest">Rest<small>full</small></div></div>
+  </div>
+</div>
+
+<!-- SESSION CLOCK -->
+<div class="clock">
+  <h3>Session A Clock — Strength &amp; Drills</h3>
+  <div class="bar">
+    <div class="seg" style="flex:15;background:#4B5866"><span>Warm-up traverse</span><b>0–15</b></div>
+    <div class="seg" style="flex:30;background:#2456E6"><span>Mirrored drills A+B</span><b>15–45</b></div>
+    <div class="seg" style="flex:8;background:#1E8A5A"><span>Hangboard</span><b>45–53</b></div>
+    <div class="seg" style="flex:7;background:#17202B"><span>Core</span><b>53–60</b></div>
+  </div>
+  <div class="ticks">
+    <div style="flex:15">0:00</div><div style="flex:30">0:15</div><div style="flex:8">0:45</div><div style="flex:7">0:53&nbsp;→&nbsp;1:00</div>
+  </div>
+</div>
+
+<div class="clock">
+  <h3>Session B Clock — Endurance</h3>
+  <div class="bar">
+    <div class="seg" style="flex:15;background:#4B5866"><span>Warm-up traverse</span><b>0–15</b></div>
+    <div class="seg" style="flex:25;background:#7A4FD1"><span>Endurance block</span><b>15–40</b></div>
+    <div class="seg" style="flex:12;background:#2456E6"><span>Light technique drills</span><b>40–52</b></div>
+    <div class="seg" style="flex:8;background:#17202B"><span>Core</span><b>52–60</b></div>
+  </div>
+  <div class="ticks">
+    <div style="flex:15">0:00</div><div style="flex:25">0:15</div><div style="flex:12">0:40</div><div style="flex:8">0:52&nbsp;→&nbsp;1:00</div>
+  </div>
+  <p style="font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-top:8px">No hangboard on Session B — endurance volume already loads the fingers. Technique block = one Block A drill from the current phase at RPE 5.</p>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="lg ok"><h4>Cleared from Week 1</h4>Static feet under hips, downclimbing, straight-on locks, gastons, underclings, open flags on straight leg.</div>
+  <div class="lg cau"><h4>Introduce with caution</h4>Backsteps &amp; outside flags (Wk 4+), shallow drop knees (Wk 7+), high steps above mid-thigh (Wk 5+).</div>
+  <div class="lg no"><h4>Avoid until cleared</h4>Heel hooks, knee bars, deep drop knees, dynamic moves, <b>any jump-off or drop</b> — downclimb everything.</div>
+</div>
+
+<!-- MOVEMENT KEY -->
+<details class="sec" open>
+<summary><h2>Movement Key <span class="tag" style="background:var(--blue-soft);color:var(--blue)">Blue = key limb</span></h2></summary>
+<p class="sub">Schematic body positions referenced in the drill tables. Dots are systems-grid holds; the blue limb is the one doing the knee-relevant work.</p>
+<div class="movekey">
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Straight-on position, feet under hips">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="100" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="100" cy="70" r="4"/>
+      <circle class="hold" cx="42" cy="134" r="4"/><circle class="hold" cx="78" cy="134" r="4"/>
+      <line class="fig" x1="60" y1="60" x2="28" y2="24"/><line class="fig" x1="60" y1="60" x2="92" y2="24"/>
+      <line class="fig" x1="60" y1="55" x2="60" y2="90"/>
+      <line class="fig-acc" x1="60" y1="90" x2="43" y2="130"/><line class="fig-acc" x1="60" y1="90" x2="77" y2="130"/>
+      <circle class="head" cx="60" cy="44" r="8"/>
+    </svg>
+    <h5>Straight-On</h5>
+    <span class="stat ok">Wk 1+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Downclimbing with control">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="90" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="90" cy="70" r="4"/>
+      <circle class="hold" cx="36" cy="134" r="4"/><circle class="hold" cx="72" cy="134" r="4"/>
+      <line class="fig" x1="54" y1="62" x2="24" y2="24"/><line class="fig" x1="54" y1="62" x2="84" y2="24"/>
+      <line class="fig" x1="54" y1="57" x2="54" y2="92"/>
+      <line class="fig" x1="54" y1="92" x2="37" y2="130"/><line class="fig" x1="54" y1="92" x2="71" y2="130"/>
+      <circle class="head" cx="54" cy="46" r="8"/>
+      <line class="fig-acc" x1="108" y1="40" x2="108" y2="112"/>
+      <polyline class="fig-acc" points="100,102 108,114 116,102"/>
+    </svg>
+    <h5>Downclimb</h5>
+    <span class="stat ok">Every rep</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Backstep on outside edge">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="95" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="95" cy="70" r="4"/>
+      <circle class="hold" cx="42" cy="134" r="4"/><circle class="hold" cx="88" cy="134" r="4"/>
+      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="89" y2="24"/>
+      <line class="fig" x1="58" y1="55" x2="62" y2="90"/>
+      <line class="fig" x1="62" y1="90" x2="44" y2="130"/>
+      <polyline class="fig-acc" points="62,90 76,108 87,130"/>
+      <circle class="head" cx="56" cy="44" r="8"/>
+    </svg>
+    <h5>Backstep</h5>
+    <span class="stat cau">Wk 4+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Outside flag with straight leg">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="88" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="88" cy="70" r="4"/>
+      <circle class="hold" cx="44" cy="134" r="4"/>
+      <line class="fig" x1="55" y1="60" x2="26" y2="24"/><line class="fig" x1="55" y1="60" x2="82" y2="24"/>
+      <line class="fig" x1="55" y1="55" x2="55" y2="90"/>
+      <line class="fig" x1="55" y1="90" x2="45" y2="130"/>
+      <line class="fig-acc" x1="55" y1="90" x2="104" y2="118"/>
+      <circle class="head" cx="55" cy="44" r="8"/>
+    </svg>
+    <h5>Outside Flag</h5>
+    <span class="stat cau">Wk 4+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="High step to mid-thigh hold">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="92" cy="18" r="4"/>
+      <circle class="hold" cx="96" cy="96" r="4"/>
+      <circle class="hold" cx="42" cy="134" r="4"/>
+      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="86" y2="24"/>
+      <line class="fig" x1="58" y1="55" x2="58" y2="90"/>
+      <line class="fig" x1="58" y1="90" x2="43" y2="130"/>
+      <polyline class="fig-acc" points="58,90 80,74 94,93"/>
+      <circle class="head" cx="58" cy="44" r="8"/>
+    </svg>
+    <h5>High Step</h5>
+    <span class="stat cau">Wk 5+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Shallow drop knee, knee rotated downward">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="92" cy="18" r="4"/>
+      <circle class="hold" cx="100" cy="98" r="4"/>
+      <circle class="hold" cx="40" cy="134" r="4"/>
+      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="86" y2="24"/>
+      <line class="fig" x1="58" y1="55" x2="58" y2="90"/>
+      <line class="fig" x1="58" y1="90" x2="41" y2="130"/>
+      <polyline class="fig-acc" points="58,90 82,122 99,101"/>
+      <circle class="head" cx="58" cy="44" r="8"/>
+    </svg>
+    <h5>Drop Knee</h5>
+    <span class="stat cau">Wk 7+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Heel hook at hip height">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="88" cy="18" r="4"/>
+      <circle class="hold" cx="102" cy="86" r="4"/>
+      <circle class="hold" cx="40" cy="134" r="4"/>
+      <line class="fig" x1="55" y1="60" x2="26" y2="24"/><line class="fig" x1="55" y1="60" x2="82" y2="24"/>
+      <line class="fig" x1="55" y1="55" x2="55" y2="90"/>
+      <line class="fig" x1="55" y1="90" x2="41" y2="130"/>
+      <polyline class="fig-acc" points="55,90 80,94 100,86"/>
+      <circle class="fig-acc" cx="101" cy="86" r="3" style="fill:var(--blue)"/>
+      <circle class="head" cx="55" cy="44" r="8"/>
+    </svg>
+    <h5>Heel Hook</h5>
+    <span class="stat no">Wk 8+ only</span>
+  </div>
+
+</div>
+</details>
+
+<!-- PHASE 1 -->
+<details class="sec phase" id="phase1" open>
+<summary><h2 class="p1">Phase 1 <span class="tag">Weeks 1–3</span></h2></summary>
+<p class="sub">Straight-on climbing only. Vertical to ~10° overhang. Big footholds, feet directly beneath hips, every foot placement static and deliberate. Operated leg tolerance — not grade — is the rate limiter.</p>
+
+<div class="card">
+  <div class="card-h"><h3>Block A · Lock-off Ladders</h3><div class="freq">15:00–30:00 · both sessions</div></div>
+  <table>
+    <tr><th>Drill</th><th>Sets × Reps</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>Mirrored lock-off ladder — pull to lock, hold, move up one hold. 6 moves per side.<span class="note">Left side, then identical sequence mirrored right.</span><span class="knee ok">Feet static, hip-width</span></td>
+      <td class="num">4 × 6 moves<br>(2L / 2R)</td>
+      <td class="num">2:30</td>
+      <td>3-sec lock each move · RPE 6–7</td>
+    </tr>
+    <tr>
+      <td>Gaston → undercling ladder — alternate gaston and undercling up the grid.<span class="knee ok">No high steps</span></td>
+      <td class="num">3 × 6 moves<br>(mirrored)</td>
+      <td class="num">2:00</td>
+      <td>Smooth, zero foot readjustments · RPE 6</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Block B · Tension &amp; Control</h3><div class="freq">30:00–45:00 · both sessions</div></div>
+  <table>
+    <tr><th>Drill</th><th>Sets × Reps</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>3-second pause traverse — pause 3s after every hand move, hips stay square to wall.</td>
+      <td class="num">3 × 10 moves</td>
+      <td class="num">2:00</td>
+      <td>No momentum, silent feet · RPE 5–6</td>
+    </tr>
+    <tr>
+      <td>Downclimb repeats — climb 6 moves up, downclimb the identical sequence.<span class="knee ok">Zero drops — this is the knee-protection drill</span></td>
+      <td class="num">3 × 12 moves<br>(6 up / 6 down)</td>
+      <td class="num">2:30</td>
+      <td>Down as controlled as up · RPE 6</td>
+    </tr>
+  </table>
+</div>
+
+</details>
+
+<!-- PHASE 2 -->
+<details class="sec phase" id="phase2">
+<summary><h2 class="p2">Phase 2 <span class="tag">Weeks 4–6</span></h2></summary>
+<p class="sub">Gentle knee involvement begins. Add shallow backsteps and outside flags — the foot must pivot freely; never lock the foot and twist. Steps may rise to mid-thigh from Week 5. Angle to ~20° overhang if pain-free.</p>
+
+<div class="card">
+  <div class="card-h"><h3>Block A · Rotational Prep</h3><div class="freq">15:00–30:00 · both sessions</div></div>
+  <table>
+    <tr><th>Drill</th><th>Sets × Reps</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>Shallow backstep ladder — outside edge, hip turns in ≤45°, 6 moves per side.<span class="knee cau">Foot pivots freely on hold</span></td>
+      <td class="num">4 × 6 moves<br>(2L / 2R)</td>
+      <td class="num">2:30</td>
+      <td>Compare op-leg vs. non-op tolerance · RPE 6</td>
+    </tr>
+    <tr>
+      <td>Outside flag circuit — flag the free leg on every second move.<span class="knee cau">Straight flagging leg only</span></td>
+      <td class="num">3 × 8 moves<br>(mirrored)</td>
+      <td class="num">2:00</td>
+      <td>Hip stays close to wall · RPE 6–7</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Block B · Loaded Control</h3><div class="freq">30:00–45:00 · both sessions</div></div>
+  <table>
+    <tr><th>Drill</th><th>Sets × Reps</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>Mid-thigh high-step repeats — deliberate high step, weight through the whole foot, stand up slowly (3s).<span class="knee cau">Wk 5+ only · alternate legs each rep</span></td>
+      <td class="num">3 × 6 reps<br>(3 per leg)</td>
+      <td class="num">2:30</td>
+      <td>No knee wobble on stand-up · RPE 7</td>
+    </tr>
+    <tr>
+      <td>3-second pause ladder on smaller feet — Phase 1 pause drill, footholds one size down.</td>
+      <td class="num">3 × 8 moves</td>
+      <td class="num">2:00</td>
+      <td>Core holds the pause, not arms · RPE 7</td>
+    </tr>
+  </table>
+</div>
+
+</details>
+
+<!-- PHASE 3 -->
+<details class="sec phase" id="phase3">
+<summary><h2 class="p3">Phase 3 <span class="tag">Weeks 7–8+</span></h2></summary>
+<p class="sub">Reintroduce rotation properly. Shallow drop knees on big holds, mirrored so the operated knee is directly compared against the healthy side. Heel hooks come absolutely last — they load the meniscus and hamstring attachment more than expected.</p>
+
+<div class="card">
+  <div class="card-h"><h3>Block A · Drop Knee Progression</h3><div class="freq">15:00–30:00 · both sessions</div></div>
+  <table>
+    <tr><th>Drill</th><th>Sets × Reps</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>Shallow drop knee holds — big foothold, knee rotates ≤45° down, hold the position statically.<span class="knee cau">Ease in over 2s · never snap into it</span></td>
+      <td class="num">4 × 5 reps ×<br>5s hold (mirrored)</td>
+      <td class="num">2:30</td>
+      <td>Zero sharp/joint-line pain · RPE 6</td>
+    </tr>
+    <tr>
+      <td>Drop knee ladder — link 4 moves using a shallow drop knee on alternating sides.</td>
+      <td class="num">3 × 4 moves<br>(mirrored)</td>
+      <td class="num">2:30</td>
+      <td>Op-leg matches non-op smoothness · RPE 7</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Block B · Integration</h3><div class="freq">30:00–45:00 · both sessions</div></div>
+  <table>
+    <tr><th>Drill</th><th>Sets × Reps</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>Mixed-pattern circuit — 8 moves combining backstep, flag, high step, and one shallow drop knee.</td>
+      <td class="num">4 × 8 moves<br>(mirrored)</td>
+      <td class="num">3:00</td>
+      <td>Fluid linking, no hesitation · RPE 7–8</td>
+    </tr>
+    <tr>
+      <td>Heel hook introduction — large hold at hip height, load progressively to ~50% effort. <span class="note">Only if all drop-knee work is pain-free for 2 full sessions.</span><span class="knee cau">Wk 8+ · stop at any posterior knee pain</span></td>
+      <td class="num">2 × 4 reps ×<br>5s (per leg)</td>
+      <td class="num">2:00</td>
+      <td>Sub-maximal only · RPE 5</td>
+    </tr>
+  </table>
+</div>
+
+</details>
+
+<!-- ENDURANCE -->
+<details class="sec" id="endurance">
+<summary><h2>Endurance <span class="tag" style="background:#EFE7FB;color:#7A4FD1">Session B · 15:00–40:00</span></h2></summary>
+<p class="sub">Endurance work runs on Session B each week and progresses alongside the drill phases. It's knee-friendly by design — low intensity, big holds, static feet — so it starts in Week 1. On ARC blocks you should be able to hold a conversation; a deep forearm pump means the wall is too steep or the holds too small.</p>
+
+<div class="card">
+  <div class="card-h"><h3>Phase 1 · Aerobic Base (Wks 1–3)</h3><div class="freq">Vertical wall · jugs only</div></div>
+  <table>
+    <tr><th>Workout</th><th>Sets × Time</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>ARC traverse — continuous climbing, never stopping, never pumping out. Shake out on the wall, not off it.<span class="knee ok">Feet under hips, static placements</span></td>
+      <td class="num">2 × 8:00<br>continuous</td>
+      <td class="num">5:00</td>
+      <td>Conversational pace · RPE 4–5</td>
+    </tr>
+    <tr>
+      <td>Foot-precision cooldown traverse — same rules, eyes on every foothold until the foot lands.</td>
+      <td class="num">1 × 5:00</td>
+      <td class="num">—</td>
+      <td>Zero foot readjustments · RPE 3–4</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Phase 2 · Aerobic Capacity (Wks 4–6)</h3><div class="freq">Up to ~15° · smaller jugs</div></div>
+  <table>
+    <tr><th>Workout</th><th>Sets × Time</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>Extended ARC — longer continuous blocks; weave in backsteps and outside flags as they're cleared in the drill phases.<span class="knee cau">Foot pivots freely on every turn</span></td>
+      <td class="num">3 × 8:00<br>continuous</td>
+      <td class="num">4:00</td>
+      <td>Mild pump only, recovers on the wall · RPE 5</td>
+    </tr>
+    <tr>
+      <td>Minute on / minute off ladder — 1:00 of continuous moderate climbing, 1:00 full rest. Alternate weekly with extended ARC.</td>
+      <td class="num">8 × 1:00 on<br>/ 1:00 off</td>
+      <td class="num">built in</td>
+      <td>Same move count every round · RPE 6</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Phase 3 · Power Endurance (Wks 7+)</h3><div class="freq">Up to ~20° · full movement menu</div></div>
+  <table>
+    <tr><th>Workout</th><th>Sets × Time</th><th>Rest</th><th>Target / RPE</th></tr>
+    <tr>
+      <td>Systems 4×4 — build 4 mirrored circuits of 8 moves each; climb all 4 back-to-back with ~15s between circuits = 1 set. Downclimb, never drop.<span class="knee cau">One shallow drop knee max per circuit</span></td>
+      <td class="num">4 sets ×<br>4 circuits</td>
+      <td class="num">4:00<br>between sets</td>
+      <td>Pumped but clean on the last circuit · RPE 7–8</td>
+    </tr>
+    <tr>
+      <td>ARC flush — easy continuous traverse to clear the pump after the 4×4.</td>
+      <td class="num">1 × 8:00</td>
+      <td class="num">—</td>
+      <td>Recovery pace · RPE 3–4</td>
+    </tr>
+  </table>
+</div>
+
+</details>
+
+<!-- FINISHER -->
+<details class="sec">
+<summary><h2>Finisher <span class="tag" style="background:var(--blue-soft);color:var(--blue)">Session A · 45:00–60:00</span></h2></summary>
+<p class="sub">Full finisher on Session A only. On Session B, skip the hangboard (endurance volume already loads the fingers) and run just the three core/leg exercises from 52:00–60:00.</p>
+<div class="card">
+  <table>
+    <tr><th>Exercise</th><th>Sets × Reps</th><th>Rest</th><th>Notes</th></tr>
+    <tr>
+      <td>Hangboard — 20mm edge, open-hand, feet assisted as needed</td>
+      <td class="num">3 × 10s hang</td>
+      <td class="num">1:50 between</td>
+      <td>RPE 7 — reduce assist weekly, never to failure</td>
+    </tr>
+    <tr>
+      <td>Front plank</td>
+      <td class="num">3 × 30–45s</td>
+      <td class="num">0:45</td>
+      <td>Progress to 60s by Wk 4</td>
+    </tr>
+    <tr>
+      <td>Side plank (both sides)</td>
+      <td class="num">2 × 20–30s / side</td>
+      <td class="num">0:30</td>
+      <td>Builds flag &amp; drop-knee stability</td>
+    </tr>
+    <tr>
+      <td>Straight-leg raises, operated side</td>
+      <td class="num">2 × 12 reps</td>
+      <td class="num">0:45</td>
+      <td>Slow 3s down phase — quad activation</td>
+    </tr>
+  </table>
+</div>
+</details>
+
+<!-- CYCLING -->
+<details class="sec">
+<summary><h2>Cycling · ERG Trainer <span class="tag" style="background:var(--amber-soft);color:var(--amber)">3 rides / week</span></h2></summary>
+<p class="sub">All rides in ERG mode, targets as %FTP with watts shown for <b>FTP 124</b> — retest with a seated ramp test (Half Monty) around Wks 4–6 and update; save the full 4DP/Full Frontal (max sprints) until after full clearance. The knee rule on the trainer is <b>cadence</b>: ERG holds power constant, so lower rpm means higher torque per pedal stroke — exactly the load a healing knee doesn't want. Keep every interval at 85+ rpm; if the knee grumbles, spin faster at the same power rather than dropping the target. Stay seated throughout — no standing efforts until Phase 3.</p>
+
+<div class="card" id="ride1">
+  <div class="card-h"><h3>Ride 1 · Zone 2 Aerobic — Tuesday</h3><div class="freq">60:00 · ~55 TSS</div></div>
+  <table>
+    <tr><th>Block</th><th>Time</th><th>Target</th><th>Cadence / Notes</th></tr>
+    <tr><td>Warm-up ramp</td><td class="num">10:00</td><td class="num">50 → 65% FTP<br>62 → 81W</td><td>Build gradually, settle in</td></tr>
+    <tr><td>Steady blocks × 3<span class="note">3:00 @ 55% (68W) between blocks</span></td><td class="num">3 × 12:00</td><td class="num">68% FTP<br>~84W</td><td>90–95 rpm · nasal-breathing pace</td></tr>
+    <tr><td>Cooldown</td><td class="num">5:00</td><td class="num">50% FTP<br>62W</td><td>Easy spin</td></tr>
+    <tr><td colspan="4"><span class="knee ok">Phase 1 (Wks 1–3): trim to 3 × 10:00 @ 65% (81W) — total 50:00, ~42 TSS</span></td></tr>
+  </table>
+</div>
+
+<div class="card" id="ride2">
+  <div class="card-h"><h3>Ride 2 · Sweet Spot — Friday</h3><div class="freq">60:00 · ~70 TSS</div></div>
+  <table>
+    <tr><th>Block</th><th>Time</th><th>Target</th><th>Cadence / Notes</th></tr>
+    <tr><td>Warm-up ramp<span class="note">Include 2 × 0:30 @ 85% (105W) primers in the last 4 min</span></td><td class="num">12:00</td><td class="num">50 → 70% FTP<br>62 → 87W</td><td>85–90 rpm</td></tr>
+    <tr><td>Sweet spot × 3<span class="note">5:00 @ 55% (68W) between intervals</span></td><td class="num">3 × 8:00</td><td class="num">88–90% FTP<br>109–112W</td><td>85–90 rpm · hold form, no rocking</td></tr>
+    <tr><td>Cooldown</td><td class="num">5:00</td><td class="num">50% FTP<br>62W</td><td>Easy spin</td></tr>
+    <tr><td colspan="4">
+      <span class="knee ok">Wks 1–3: 3 × 6:00 @ 85% (105W)</span>&nbsp;
+      <span class="knee cau">Wks 4–6: 3 × 10:00 @ 88–90% (109–112W)</span>&nbsp;
+      <span class="knee cau">Wks 7+: 2 × 15:00 @ 90% (112W, ~80 TSS)</span>
+    </td></tr>
+  </table>
+</div>
+
+<div class="card" id="ride3">
+  <div class="card-h"><h3>Ride 3 · Long Z2 + Cadence — Saturday</h3><div class="freq">75:00 · ~65 TSS</div></div>
+  <table>
+    <tr><th>Block</th><th>Time</th><th>Target</th><th>Cadence / Notes</th></tr>
+    <tr><td>Warm-up ramp</td><td class="num">10:00</td><td class="num">50 → 65% FTP<br>62 → 81W</td><td>Relaxed</td></tr>
+    <tr><td>Continuous Z2<span class="note">Every 12:00, insert a 1:00 cadence surge — 4 surges total</span></td><td class="num">55:00</td><td class="num">65–70% FTP<br>81–87W · surges same power</td><td>90 rpm base · surges 100–105 rpm — leg speed, not power</td></tr>
+    <tr><td>Cooldown</td><td class="num">10:00</td><td class="num">50% FTP<br>62W</td><td>Easy spin</td></tr>
+    <tr><td colspan="4"><span class="knee ok">Swappable for an outdoor flat ride (NCR-style, minimal climbing) at the same duration once cleared for road riding</span></td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Weekly Bike Load</h3><div class="freq">Progression guide</div></div>
+  <table>
+    <tr><th>Weeks</th><th>Ride 1</th><th>Ride 2</th><th>Ride 3</th><th>Bike TSS</th></tr>
+    <tr><td>1–3</td><td class="num">50:00 · 42</td><td class="num">3×6 @ 85% · 58</td><td class="num">60:00 · 50</td><td class="num">~150</td></tr>
+    <tr><td>4–6</td><td class="num">60:00 · 55</td><td class="num">3×10 @ 88–90% · 74</td><td class="num">75:00 · 65</td><td class="num">~195</td></tr>
+    <tr><td>7+</td><td class="num">60:00 · 55</td><td class="num">2×15 @ 90% · 80</td><td class="num">75–90:00 · 65–78</td><td class="num">~200–215</td></tr>
+  </table>
+</div>
+</details>
+
+<!-- RULES -->
+<div class="rules">
+  <h2>Progression &amp; Stop Rules</h2>
+  <ol>
+    <li><b>Downclimb everything.</b> Impact from even low drops is the single biggest threat to the healing meniscus. No exceptions in any phase.</li>
+    <li><b>24-hour rule.</b> Mild fatigue-type discomfort during a session is acceptable; any swelling, sharp pain, or joint-line pain lasting past the next morning means repeat the previous week — do not progress.</li>
+    <li><b>Advance one variable at a time.</b> Angle, foothold size, or movement type — never two in the same week.</li>
+    <li><b>Mirror every drill.</b> The operated leg must match the healthy side in smoothness and confidence before its loading increases.</li>
+    <li><b>Phase gates:</b> enter Phase 2 only if all Phase 1 drills are pain-free for 2 consecutive sessions; same rule for Phase 3. Heel hooks require 2 pain-free drop-knee sessions first.</li>
+    <li><b>Confirm clearance.</b> Twisting/pivoting progression (Phase 2 onward) should align with your surgical team's return-to-sport guidance.</li>
+  </ol>
+</div>
+
+<!-- SESSION LOG -->
+<h2>Session Log <span class="tag" style="background:#F0F2F5;color:var(--ink-soft)">Saved on this device</span></h2>
+<p class="sub">Log every session with a pain score, then come back the next morning and tap the 24h check on the entry — that's the flag that governs the progression rules. Data lives in this browser's storage; use Export for a backup.</p>
+
+<div class="log">
+  <div class="log-form">
+    <div class="lf">
+      <label for="log-date">Date</label>
+      <input type="date" id="log-date">
+    </div>
+    <div class="lf full">
+      <label>Session</label>
+      <div class="seg-btns" id="type-btns">
+        <button data-v="A" class="on">A · Strength</button>
+        <button data-v="B">B · Endur</button>
+        <button data-v="R1">R1 · Z2</button>
+        <button data-v="R2">R2 · SS</button>
+        <button data-v="R3">R3 · Long</button>
+      </div>
+    </div>
+    <div class="lf">
+      <label>Phase</label>
+      <div class="seg-btns" id="phase-btns">
+        <button data-v="1" class="on">1</button>
+        <button data-v="2">2</button>
+        <button data-v="3">3</button>
+      </div>
+    </div>
+    <div class="lf">
+      <label for="log-pain">Knee pain during session (0–10)</label>
+      <div class="pain-row">
+        <input type="range" id="log-pain" min="0" max="10" step="1" value="0">
+        <div class="pain-val" id="pain-val">0</div>
+      </div>
+    </div>
+    <div class="lf full">
+      <label for="log-notes">Notes — drills / intervals completed, cadence, what felt off</label>
+      <textarea id="log-notes" placeholder="e.g. Sweet spot 3×8 @ 210W done, 88rpm, knee quiet throughout"></textarea>
+    </div>
+    <button class="save-btn" id="save-btn">Save Session</button>
+  </div>
+
+  <div class="log-stats">
+    <div class="stat-box"><b id="st-total">0</b><span>Sessions</span></div>
+    <div class="stat-box"><b id="st-week">0 / 2</b><span>This week</span></div>
+    <div class="stat-box"><b id="st-pain">—</b><span>Avg pain · last 5</span></div>
+  </div>
+  <div class="trend" id="trend"></div>
+  <div class="trend-label" id="trend-label">Pain trend — last 10 sessions</div>
+
+  <div class="entries" id="entries"></div>
+
+  <div class="log-tools">
+    <button id="export-btn">Export JSON</button>
+    <button id="clear-btn">Clear all</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='sbkr_log_v1';
+  var typeV='A', phaseV='1';
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[] }catch(e){ return [] } }
+  function store(a){ try{ localStorage.setItem(KEY,JSON.stringify(a)) }catch(e){ alert('Could not save — storage unavailable.') } }
+  function esc(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function fmt(d){ var p=d.split('-'); return p[1]+'/'+p[2]+'/'+p[0].slice(2); }
+  function weekStart(dt){ var d=new Date(dt); var day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); d.setHours(0,0,0,0); return d; }
+
+  function segInit(id, cb){
+    var box=document.getElementById(id);
+    box.addEventListener('click',function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      box.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on'); cb(b.dataset.v);
+    });
+  }
+  segInit('type-btns',function(v){typeV=v});
+  segInit('phase-btns',function(v){phaseV=v});
+
+  var painEl=document.getElementById('log-pain');
+  painEl.addEventListener('input',function(){ document.getElementById('pain-val').textContent=painEl.value; });
+
+  var dateEl=document.getElementById('log-date');
+  dateEl.value=new Date().toISOString().slice(0,10);
+
+  function painChip(p){ return p<=2?'pain-lo':(p<=4?'pain-md':'pain-hi'); }
+
+  function render(){
+    var data=load().slice().sort(function(a,b){ return b.date.localeCompare(a.date)||b.id-a.id; });
+    document.getElementById('st-total').textContent=data.length;
+
+    var ws=weekStart(new Date());
+    var wkEntries=data.filter(function(e){ return new Date(e.date+'T12:00')>=ws; });
+    var wkClimb=wkEntries.filter(function(e){return e.type==='A'||e.type==='B'}).length;
+    var wkBike=wkEntries.length-wkClimb;
+    var stw=document.getElementById('st-week');
+    stw.textContent=wkEntries.length+' / 5';
+    stw.title='Climb '+wkClimb+'/2 · Bike '+wkBike+'/3';
+
+    var last5=data.slice(0,5);
+    document.getElementById('st-pain').textContent=last5.length?(last5.reduce(function(s,e){return s+e.pain},0)/last5.length).toFixed(1):'—';
+
+    var t=document.getElementById('trend'); t.innerHTML='';
+    var last10=data.slice(0,10).reverse();
+    last10.forEach(function(e){
+      var d=document.createElement('div');
+      d.style.height=Math.max(8,e.pain*10)+'%';
+      if(e.pain>=5) d.className='hi';
+      d.title=fmt(e.date)+' · pain '+e.pain;
+      t.appendChild(d);
+    });
+    document.getElementById('trend-label').style.display=last10.length?'block':'none';
+    t.style.display=last10.length?'flex':'none';
+
+    var box=document.getElementById('entries'); box.innerHTML='';
+    if(!data.length){ box.innerHTML='<div class="empty-log">No sessions logged yet — first one starts the clock.</div>'; return; }
+    data.forEach(function(e){
+      var div=document.createElement('div'); div.className='entry';
+      var flagBtn = e.flag24===true ? '<button class="flag-on" data-act="flag" data-id="'+e.id+'">⚠ 24h: swelling/pain</button>'
+                  : e.flag24===false ? '<button class="flag-ok" data-act="flag" data-id="'+e.id+'">✓ 24h: clear</button>'
+                  : '<button data-act="flag" data-id="'+e.id+'">24h check — tap tomorrow</button>';
+      var tCls = e.type==='A' ? 'a' : (e.type==='B' ? 'b' : 'r');
+      var tLbl = e.type==='A' ? 'Climb A' : (e.type==='B' ? 'Climb B' : 'Ride '+String(e.type).slice(1));
+      div.innerHTML =
+        '<div class="entry-top"><span class="d">'+fmt(e.date)+'</span>'+
+        '<span class="chip '+tCls+'">'+tLbl+'</span>'+
+        '<span class="chip p">Phase '+e.phase+'</span>'+
+        '<span class="chip '+painChip(e.pain)+'">Pain '+e.pain+'</span></div>'+
+        (e.notes?'<div class="note-txt">'+esc(e.notes)+'</div>':'')+
+        '<div class="entry-actions">'+flagBtn+
+        '<button data-act="del" data-id="'+e.id+'">Delete</button></div>';
+      box.appendChild(div);
+    });
+  }
+
+  document.getElementById('save-btn').addEventListener('click',function(){
+    var data=load();
+    data.push({ id:Date.now(), date:dateEl.value, type:typeV, phase:phaseV,
+      pain:parseInt(painEl.value,10), notes:document.getElementById('log-notes').value.trim(), flag24:null });
+    store(data);
+    document.getElementById('log-notes').value='';
+    painEl.value=0; document.getElementById('pain-val').textContent='0';
+    render();
+    if(data.length>0 && data.length%5===0){
+      if(confirm('You\u2019ve logged '+data.length+' sessions \u2014 copy a JSON backup to clipboard? (Safari can purge site storage after long inactivity.)')) doExport();
+    }
+  });
+
+  document.getElementById('entries').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    var id=Number(b.dataset.id); var data=load();
+    var i=data.findIndex(function(x){return x.id===id}); if(i<0) return;
+    if(b.dataset.act==='del'){
+      if(!confirm('Delete this session?')) return;
+      data.splice(i,1);
+    } else {
+      // cycle: unchecked -> clear -> flagged -> unchecked
+      data[i].flag24 = data[i].flag24===null ? false : (data[i].flag24===false ? true : null);
+      if(data[i].flag24===true) alert('24h flag set. Per the stop rules: repeat the previous week — do not progress.');
+    }
+    store(data); render();
+  });
+
+  function doExport(){
+    var txt=JSON.stringify(load(),null,2);
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){alert('Log copied to clipboard as JSON.')},function(){prompt('Copy your log:',txt)});
+    } else { prompt('Copy your log:',txt); }
+  }
+  document.getElementById('export-btn').addEventListener('click',doExport);
+
+  document.getElementById('clear-btn').addEventListener('click',function(){
+    if(confirm('Delete ALL logged sessions? This cannot be undone.')){ store([]); render(); }
+  });
+
+  /* ---- auto-detect today: highlight day + pre-select session ---- */
+  var DMAP={1:'A',2:'R1',3:null,4:'B',5:'R2',6:'R3',0:null};
+  (function(){
+    var idx=(new Date().getDay()+6)%7;
+    var cells=document.querySelectorAll('.week .day');
+    if(cells[idx]) cells[idx].classList.add('today');
+    var pre=DMAP[new Date().getDay()];
+    if(pre){
+      document.querySelectorAll('#type-btns button').forEach(function(b){
+        b.classList.toggle('on', b.dataset.v===pre);
+      });
+      typeV=pre;
+    }
+  })();
+
+  /* ---- phase auto-tracking from plan start date ---- */
+  var SKEY='sbkr_start_v1';
+  var startEl2=document.getElementById('start-date');
+  function applyStart(){
+    var v=startEl2.value, badge=document.getElementById('wk-badge');
+    if(!v){ badge.textContent='Set start date'; return; }
+    var days=Math.floor((new Date()-new Date(v+'T00:00'))/86400000);
+    if(days<0){ badge.textContent='Starts '+fmt(v); return; }
+    var wk=Math.floor(days/7)+1;
+    var ph=wk<=3?1:(wk<=6?2:3);
+    badge.textContent='Week '+wk+' \u00b7 Phase '+ph;
+    [1,2,3].forEach(function(n){
+      var d=document.getElementById('phase'+n); if(d) d.open=(n===ph);
+    });
+    phaseV=String(ph);
+    document.querySelectorAll('#phase-btns button').forEach(function(b){
+      b.classList.toggle('on', b.dataset.v===phaseV);
+    });
+  }
+  var sv=null; try{ sv=localStorage.getItem(SKEY) }catch(e){}
+  if(sv) startEl2.value=sv;
+  startEl2.addEventListener('change',function(){
+    try{ localStorage.setItem(SKEY,startEl2.value) }catch(e){}
+    applyStart();
+  });
+  applyStart();
+
+  /* ---- rest timers: tap any mm:ss cell ---- */
+  var bar=document.createElement('div'); bar.id='timerbar';
+  bar.innerHTML='<b id="tb-time">0:00</b><span id="tb-label">Rest timer \u2014 tap to cancel</span>';
+  document.body.appendChild(bar);
+  var tInt=null, tEnd=0, actx=null;
+  function beep(){
+    try{
+      actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+      var now=actx.currentTime;
+      [0,0.3,0.6].forEach(function(off){
+        var o=actx.createOscillator(), g=actx.createGain();
+        o.frequency.value=880; o.connect(g); g.connect(actx.destination);
+        g.gain.setValueAtTime(0.25, now+off);
+        g.gain.exponentialRampToValueAtTime(0.001, now+off+0.25);
+        o.start(now+off); o.stop(now+off+0.26);
+      });
+    }catch(e){}
+    if(navigator.vibrate) navigator.vibrate([200,100,200]);
+  }
+  function tick(){
+    var s=Math.max(0, Math.round((tEnd-Date.now())/1000));
+    document.getElementById('tb-time').textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2);
+    if(s<=0){
+      clearInterval(tInt); tInt=null;
+      bar.classList.add('done');
+      document.getElementById('tb-label').textContent='Rest done \u2014 tap to dismiss';
+      beep();
+    }
+  }
+  function startTimer(sec){
+    try{
+      actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state==='suspended') actx.resume();
+    }catch(e){}
+    if(tInt) clearInterval(tInt);
+    bar.classList.remove('done'); bar.classList.add('on');
+    document.getElementById('tb-label').textContent='Rest timer \u2014 tap to cancel';
+    tEnd=Date.now()+sec*1000; tick();
+    tInt=setInterval(tick,250);
+  }
+  bar.addEventListener('click',function(){
+    if(tInt){ clearInterval(tInt); tInt=null; }
+    bar.classList.remove('on','done');
+  });
+  document.querySelectorAll('td.num').forEach(function(td){
+    var m=td.textContent.trim().match(/^(\d{1,2}):(\d{2})\b/);
+    if(!m || td.textContent.indexOf('\u00d7')>-1) return;
+    td.classList.add('t-timer'); td.title='Tap to start timer';
+    td.addEventListener('click',function(){
+      startTimer(parseInt(m[1],10)*60 + parseInt(m[2],10));
+    });
+  });
+
+  /* ---- offline: register service worker ---- */
+  if('serviceWorker' in navigator){
+    try{ navigator.serviceWorker.register('./sw.js') }catch(e){}
+  }
+
+  // Weekly layout day links: open the target section, then scroll to it
+  document.querySelectorAll('.act[data-target]').forEach(function(el){
+    el.addEventListener('click',function(){
+      var t=el.getAttribute('data-target'), node;
+      if(t==='phase'){
+        node=document.querySelector('details.phase[open]')||document.getElementById('phase1');
+      } else {
+        node=document.querySelector(t);
+      }
+      if(!node) return;
+      if(node.tagName==='DETAILS') node.open=true;
+      var d=node.closest('details'); if(d) d.open=true;
+      node.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+
+  render();
+})();
+</script>
+
+<footer>
+  <b style="color:var(--ink)">Key</b> ·
+  FTP = Functional Threshold Power, the highest power (watts) sustainable for ~1 hour; all ride targets are % of this ·
+  ERG = trainer mode that holds a fixed power target regardless of gear or cadence ·
+  TSS = Training Stress Score, workout load relative to 1 hour at FTP (100 = 1h all-out) ·
+  Z2 = Zone 2, easy aerobic intensity (~60–70% FTP), conversational ·
+  SS = Sweet Spot, just below threshold (~88–92% FTP) ·
+  rpm = pedal revolutions per minute (cadence) ·
+  RPE = Rate of Perceived Exertion, 1–10 ·
+  ARC = Aerobic Restoration &amp; Capillarity, continuous low-intensity climbing without pumping out ·
+  4×4 = 4 circuits climbed back-to-back, repeated for 4 sets ·
+  Mirrored = identical sequence performed on left and right sides of the systems grid ·
+  R1/R2/R3 = Rides 1–3 in the weekly layout ·
+  24h flag = swelling or sharp pain the morning after a session (see stop rules)
+  <br><br>General training guidance — not medical advice; progress per your surgeon/PT's clearance.
+</footer>
+
+</div>
+</body>
+</html>

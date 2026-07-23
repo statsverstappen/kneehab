@@ -1,6 +1,6 @@
-// Service worker for Systems Board Knee Recovery Plan
+// Service worker for Kneehab
 // Strategy: cache-first with background revalidation (stale-while-revalidate)
-const CACHE = 'kneeplan-v1';
+const CACHE = 'kneehab-v2';
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();

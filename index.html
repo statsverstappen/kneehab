@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Systems Board · Knee Recovery Training Plan</title>
+<title>Kneehab · Knee Recovery Training Plan</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Knee Plan">
+<meta name="apple-mobile-web-app-title" content="Kneehab">
 <meta name="theme-color" content="#10161D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -113,6 +113,8 @@
   .act.climb-b{background:#2A2144;color:#B79BF0}
   .act.bike{background:var(--amber-soft);color:var(--amber)}
   .act.rest{background:#232C37;color:var(--ink-soft)}
+  .act.pt{background:var(--green-soft);color:var(--green);margin-top:4px;font-size:11px;padding:4px 2px}
+  .act.pt small{font-size:8px}
   .act[data-target]{cursor:pointer;-webkit-tap-highlight-color:transparent}
   .act[data-target]:active{opacity:.75}
   #ride1,#ride2,#ride3,#endurance,#phase1,#phase2,#phase3{scroll-margin-top:12px}
@@ -175,6 +177,10 @@
   .chip{font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:3px}
   .chip.a{background:var(--blue-soft);color:var(--blue)} .chip.b{background:#2A2144;color:#B79BF0} .chip.r{background:var(--amber-soft);color:var(--amber)}
   .chip.p{background:#232C37;color:var(--ink-soft)}
+  .chip.pt{background:var(--green-soft);color:var(--green)}
+  .chip.ybt{background:var(--blue-soft);color:var(--blue)}
+  .ybt-row{display:flex;gap:8px}
+  .ybt-row input{flex:1;min-width:0;border:1px solid var(--line);border-radius:6px;padding:9px 10px;font-family:var(--body);font-size:14px;color:var(--ink);background:#151D26;width:100%}
   .chip.pain-lo{background:var(--green-soft);color:var(--green)} .chip.pain-md{background:var(--amber-soft);color:var(--amber)} .chip.pain-hi{background:var(--red-soft);color:var(--red)}
   .entry .note-txt{color:var(--ink-soft);margin-top:5px;font-size:12.5px}
   .entry-actions{display:flex;gap:8px;margin-top:8px}
@@ -199,8 +205,8 @@
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">Systems Board · Return-to-Climb Protocol</div>
-  <h1>Knee Recovery Training Plan</h1>
+  <div class="eyebrow">Kneehab · Return-to-Climb &amp; Ride Protocol + PT</div>
+  <h1>Kneehab</h1>
   <div class="meta">
     <div>Post-meniscectomy · <b>medial meniscus</b></div>
     <div>Training days <b>5×/week</b> · 2 climb + 3 bike</div>
@@ -219,14 +225,15 @@
   </div>
   <p class="sub" style="margin-top:0">Tap a day to jump to its workout. Bike days slot between climbing days so fingers and knee each get recovery; swap days as needed, but keep 48h+ between the two climbing sessions.</p>
   <div class="week">
-    <div class="day"><h6>Mon</h6><div class="act climb-a" data-target="phase">Climb A<small>strength</small></div></div>
-    <div class="day"><h6>Tue</h6><div class="act bike" data-target="#ride1">Ride 1<small>Z2 aerobic</small></div></div>
-    <div class="day"><h6>Wed</h6><div class="act rest">Rest<small>mobility</small></div></div>
-    <div class="day"><h6>Thu</h6><div class="act climb-b" data-target="#endurance">Climb B<small>endurance</small></div></div>
-    <div class="day"><h6>Fri</h6><div class="act bike" data-target="#ride2">Ride 2<small>sweet spot</small></div></div>
+    <div class="day"><h6>Mon</h6><div class="act climb-a" data-target="phase">Climb A<small>strength</small></div><div class="act pt" data-target="#ptplan">+ PT Str<small>lower body</small></div></div>
+    <div class="day"><h6>Tue</h6><div class="act bike" data-target="#ride1">Ride 1<small>Z2 aerobic</small></div><div class="act pt" data-target="#ptplan">+ Balance<small>single-leg</small></div></div>
+    <div class="day"><h6>Wed</h6><div class="act rest">Rest<small>mobility</small></div><div class="act pt" data-target="#ptplan">+ Walk<small>10–15 min</small></div></div>
+    <div class="day"><h6>Thu</h6><div class="act climb-b" data-target="#endurance">Climb B<small>endurance</small></div><div class="act pt" data-target="#ptplan">+ PT Str<small>hip &amp; chain</small></div></div>
+    <div class="day"><h6>Fri</h6><div class="act bike" data-target="#ride2">Ride 2<small>sweet spot</small></div><div class="act pt" data-target="#ptplan">+ Balance<small>single-leg</small></div></div>
     <div class="day"><h6>Sat</h6><div class="act bike" data-target="#ride3">Ride 3<small>long Z2</small></div></div>
-    <div class="day"><h6>Sun</h6><div class="act rest">Rest<small>full</small></div></div>
+    <div class="day"><h6>Sun</h6><div class="act rest">Rest<small>full</small></div><div class="act pt" data-target="#ptplan">+ YBT-A<small>every 2–3 wk</small></div></div>
   </div>
+  <p class="sub" style="margin:6px 0 0;font-size:12px">PT work stacks on existing days so hard days stay hard and rest days stay easy. PT strength rides along with the two climb sessions; balance drills follow rides; the Sunday YBT-A slot is only every 2–3 weeks.</p>
 </div>
 
 <!-- SESSION LOG -->
@@ -247,6 +254,8 @@
         <button data-v="R1">R1 · Z2</button>
         <button data-v="R2">R2 · SS</button>
         <button data-v="R3">R3 · Long</button>
+        <button data-v="PT">PT</button>
+        <button data-v="YBT">YBT-A</button>
       </div>
     </div>
     <div class="lf">
@@ -262,6 +271,24 @@
       <div class="pain-row">
         <input type="range" id="log-pain" min="0" max="10" step="1" value="0">
         <div class="pain-val" id="pain-val">0</div>
+      </div>
+    </div>
+    <div class="lf full">
+      <label>Swelling (0–4+) — primary signal per PT protocol</label>
+      <div class="seg-btns" id="swell-btns">
+        <button data-v="0" class="on">0</button>
+        <button data-v="1">1+</button>
+        <button data-v="2">2+</button>
+        <button data-v="3">3+</button>
+        <button data-v="4">4+</button>
+      </div>
+    </div>
+    <div class="lf full" id="ybt-fields" style="display:none">
+      <label>YBT-A — leg length &amp; best-of-3 reach (cm)</label>
+      <div class="ybt-row">
+        <input type="number" id="ybt-ll" placeholder="Leg length" min="1" step="0.5" inputmode="decimal">
+        <input type="number" id="ybt-l" placeholder="Reach L" min="0" step="0.5" inputmode="decimal">
+        <input type="number" id="ybt-r" placeholder="Reach R" min="0" step="0.5" inputmode="decimal">
       </div>
     </div>
     <div class="lf full">
@@ -324,123 +351,8 @@
   <div class="lg no"><h4>Avoid until cleared</h4>Heel hooks, knee bars, deep drop knees, dynamic moves, <b>any jump-off or drop</b> — downclimb everything.</div>
 </div>
 
-<!-- MOVEMENT KEY -->
-<details class="sec" open>
-<summary><h2>Movement Key <span class="tag" style="background:var(--blue-soft);color:var(--blue)">Blue = key limb</span></h2></summary>
-<p class="sub">Schematic body positions referenced in the drill tables. Dots are systems-grid holds; the blue limb is the one doing the knee-relevant work.</p>
-<div class="movekey">
-
-  <div class="mk">
-    <svg viewBox="0 0 120 150" role="img" aria-label="Straight-on position, feet under hips">
-      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="100" cy="18" r="4"/>
-      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="100" cy="70" r="4"/>
-      <circle class="hold" cx="42" cy="134" r="4"/><circle class="hold" cx="78" cy="134" r="4"/>
-      <line class="fig" x1="60" y1="60" x2="28" y2="24"/><line class="fig" x1="60" y1="60" x2="92" y2="24"/>
-      <line class="fig" x1="60" y1="55" x2="60" y2="90"/>
-      <line class="fig-acc" x1="60" y1="90" x2="43" y2="130"/><line class="fig-acc" x1="60" y1="90" x2="77" y2="130"/>
-      <circle class="head" cx="60" cy="44" r="8"/>
-    </svg>
-    <h5>Straight-On</h5>
-    <span class="stat ok">Wk 1+</span>
-  </div>
-
-  <div class="mk">
-    <svg viewBox="0 0 120 150" role="img" aria-label="Downclimbing with control">
-      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="90" cy="18" r="4"/>
-      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="90" cy="70" r="4"/>
-      <circle class="hold" cx="36" cy="134" r="4"/><circle class="hold" cx="72" cy="134" r="4"/>
-      <line class="fig" x1="54" y1="62" x2="24" y2="24"/><line class="fig" x1="54" y1="62" x2="84" y2="24"/>
-      <line class="fig" x1="54" y1="57" x2="54" y2="92"/>
-      <line class="fig" x1="54" y1="92" x2="37" y2="130"/><line class="fig" x1="54" y1="92" x2="71" y2="130"/>
-      <circle class="head" cx="54" cy="46" r="8"/>
-      <line class="fig-acc" x1="108" y1="40" x2="108" y2="112"/>
-      <polyline class="fig-acc" points="100,102 108,114 116,102"/>
-    </svg>
-    <h5>Downclimb</h5>
-    <span class="stat ok">Every rep</span>
-  </div>
-
-  <div class="mk">
-    <svg viewBox="0 0 120 150" role="img" aria-label="Backstep on outside edge">
-      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="95" cy="18" r="4"/>
-      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="95" cy="70" r="4"/>
-      <circle class="hold" cx="42" cy="134" r="4"/><circle class="hold" cx="88" cy="134" r="4"/>
-      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="89" y2="24"/>
-      <line class="fig" x1="58" y1="55" x2="62" y2="90"/>
-      <line class="fig" x1="62" y1="90" x2="44" y2="130"/>
-      <polyline class="fig-acc" points="62,90 76,108 87,130"/>
-      <circle class="head" cx="56" cy="44" r="8"/>
-    </svg>
-    <h5>Backstep</h5>
-    <span class="stat cau">Wk 4+</span>
-  </div>
-
-  <div class="mk">
-    <svg viewBox="0 0 120 150" role="img" aria-label="Outside flag with straight leg">
-      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="88" cy="18" r="4"/>
-      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="88" cy="70" r="4"/>
-      <circle class="hold" cx="44" cy="134" r="4"/>
-      <line class="fig" x1="55" y1="60" x2="26" y2="24"/><line class="fig" x1="55" y1="60" x2="82" y2="24"/>
-      <line class="fig" x1="55" y1="55" x2="55" y2="90"/>
-      <line class="fig" x1="55" y1="90" x2="45" y2="130"/>
-      <line class="fig-acc" x1="55" y1="90" x2="104" y2="118"/>
-      <circle class="head" cx="55" cy="44" r="8"/>
-    </svg>
-    <h5>Outside Flag</h5>
-    <span class="stat cau">Wk 4+</span>
-  </div>
-
-  <div class="mk">
-    <svg viewBox="0 0 120 150" role="img" aria-label="High step to mid-thigh hold">
-      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="92" cy="18" r="4"/>
-      <circle class="hold" cx="96" cy="96" r="4"/>
-      <circle class="hold" cx="42" cy="134" r="4"/>
-      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="86" y2="24"/>
-      <line class="fig" x1="58" y1="55" x2="58" y2="90"/>
-      <line class="fig" x1="58" y1="90" x2="43" y2="130"/>
-      <polyline class="fig-acc" points="58,90 80,74 94,93"/>
-      <circle class="head" cx="58" cy="44" r="8"/>
-    </svg>
-    <h5>High Step</h5>
-    <span class="stat cau">Wk 5+</span>
-  </div>
-
-  <div class="mk">
-    <svg viewBox="0 0 120 150" role="img" aria-label="Shallow drop knee, knee rotated downward">
-      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="92" cy="18" r="4"/>
-      <circle class="hold" cx="100" cy="98" r="4"/>
-      <circle class="hold" cx="40" cy="134" r="4"/>
-      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="86" y2="24"/>
-      <line class="fig" x1="58" y1="55" x2="58" y2="90"/>
-      <line class="fig" x1="58" y1="90" x2="41" y2="130"/>
-      <polyline class="fig-acc" points="58,90 82,122 99,101"/>
-      <circle class="head" cx="58" cy="44" r="8"/>
-    </svg>
-    <h5>Drop Knee</h5>
-    <span class="stat cau">Wk 7+</span>
-  </div>
-
-  <div class="mk">
-    <svg viewBox="0 0 120 150" role="img" aria-label="Heel hook at hip height">
-      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="88" cy="18" r="4"/>
-      <circle class="hold" cx="102" cy="86" r="4"/>
-      <circle class="hold" cx="40" cy="134" r="4"/>
-      <line class="fig" x1="55" y1="60" x2="26" y2="24"/><line class="fig" x1="55" y1="60" x2="82" y2="24"/>
-      <line class="fig" x1="55" y1="55" x2="55" y2="90"/>
-      <line class="fig" x1="55" y1="90" x2="41" y2="130"/>
-      <polyline class="fig-acc" points="55,90 80,94 100,86"/>
-      <circle class="fig-acc" cx="101" cy="86" r="3" style="fill:var(--blue)"/>
-      <circle class="head" cx="55" cy="44" r="8"/>
-    </svg>
-    <h5>Heel Hook</h5>
-    <span class="stat no">Wk 8+ only</span>
-  </div>
-
-</div>
-</details>
-
 <!-- PHASE 1 -->
-<details class="sec phase" id="phase1" open>
+<details class="sec phase" id="phase1">
 <summary><h2 class="p1">Phase 1 <span class="tag">Weeks 1–3</span></h2></summary>
 <p class="sub">Straight-on climbing only. Vertical to ~10° overhang. Big footholds, feet directly beneath hips, every foot placement static and deliberate. Operated leg tolerance — not grade — is the rate limiter.</p>
 
@@ -726,6 +638,64 @@
 </div>
 </details>
 
+<!-- PT PLAN -->
+<details class="sec" id="ptplan">
+<summary><h2>PT · Post-Meniscectomy Protocol <span class="tag" style="background:var(--green-soft);color:var(--green)">YBT-A gated</span></h2></summary>
+<p class="sub">From your home PT protocol (4-phase, YBT-A integrated). Swelling is the primary feedback signal — log it with every session. The YBT-A is the gate for all impact work.</p>
+
+<div class="card">
+  <div class="card-h"><h3>Phase Mapping</h3><span class="freq">PT phase ↔ app phase</span></div>
+  <table>
+    <tr><th>PT Phase</th><th>Timeline</th><th>Runs alongside</th><th>Gate to advance</th></tr>
+    <tr><td><b>III — Rebuild</b></td><td class="num">Wk 6–16</td><td>App Phase 1–2 (climb drills + Z2/SS rides)</td><td>Full ROM · swelling ≤1+ · YBT-A SSD ≤8 cm<span class="note">No load &gt;70° knee flexion through wk 16</span></td></tr>
+    <tr><td><b>IV — Restore</b></td><td class="num">Wk 16+</td><td>App Phase 3 (dynamic climbing, full rides)</td><td>Walk–jog: SSD ≤8 cm + ≥55% depth/LL · Continuous running: SSD ≤4 cm + ≥55%</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>PT Strength — stacks on Climb A &amp; B days</h3><span class="freq">Mon · Thu, after climbing</span></div>
+  <table>
+    <tr><th>Exercise</th><th>Dose</th><th>Notes</th></tr>
+    <tr><td>Squats</td><td class="num">12 × 3</td><td>Progress toward 70° — hard cap ≤70° under load through wk 16</td></tr>
+    <tr><td>Reverse → forward lunges</td><td class="num">10/leg × 2–3</td><td>Reverse first (easier on knee) · 3-count controlled descent</td></tr>
+    <tr><td>Single-leg RDL</td><td class="num">8–10/leg × 2–3</td><td>Hip hinge, slight knee bend — hamstring, not knee</td></tr>
+    <tr><td>Lateral walks</td><td class="num">10–15 steps × 2</td><td>Bodyweight only</td></tr>
+    <tr><td>Calf raises</td><td class="num">20 × 2</td><td>Double-leg → single-leg progression</td></tr>
+    <tr><td>Step-downs <span class="knee cau">PT IV</span></td><td class="num">10/leg × 2–3</td><td>6–8 in step · 4-sec eccentric — the key rep for running prep</td></tr>
+    <tr><td>Single-leg squats <span class="knee cau">PT IV</span></td><td class="num">10/leg × 3</td><td>30–45° · knee tracks over 2nd toe, no valgus collapse</td></tr>
+    <tr><td>Plyometrics <span class="knee cau">gated</span></td><td class="num">8–10 × 2</td><td>Two-leg jumps → single-leg hops · only after jogging is symptom-free</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Balance — after Ride 1 &amp; 2</h3><span class="freq">Tue · Fri, ~10 min</span></div>
+  <table>
+    <tr><th>Drill</th><th>Dose</th><th>Progression</th></tr>
+    <tr><td>Single-leg stance</td><td class="num">30–45 s × 3/leg</td><td>Eyes closed → head turns → cushion</td></tr>
+    <tr><td>Single-leg mini squat</td><td class="num">10 × 2</td><td>30° max · wall nearby · no valgus</td></tr>
+    <tr><td>Step-ups</td><td class="num">10/leg × 2</td><td>6–8 in step · 3-sec lowering</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-h"><h3>Walk–Jog Protocol <span class="knee cau">PT IV · YBT-gated</span></h3><span class="freq">Unlocks at SSD ≤8 cm + ≥55% depth/LL</span></div>
+  <table>
+    <tr><th>Week</th><th>5 cycles of</th><th>Rule</th></tr>
+    <tr><td class="num">Wk 1</td><td>Walk 4 min · jog 1 min</td><td rowspan="5">5-min warm-up and cool-down walk every session. Any swelling increase = return to previous week's ratio. Progress week by week regardless of how good it feels.</td></tr>
+    <tr><td class="num">Wk 2</td><td>Walk 3 · jog 2</td></tr>
+    <tr><td class="num">Wk 3</td><td>Walk 2 · jog 3</td></tr>
+    <tr><td class="num">Wk 4</td><td>Walk 1 · jog 4</td></tr>
+    <tr><td class="num">Wk 5+</td><td>Continuous — needs SSD ≤4 cm</td></tr>
+  </table>
+</div>
+
+<div class="legend">
+  <div class="lg ok"><h4>Swelling 0–1+</h4>Proceed as planned — acceptable if resolved within 24 hrs.</div>
+  <div class="lg cau"><h4>Swelling 2+</h4>Reduce intensity, ice, do not progress this week.</div>
+  <div class="lg no"><h4>Swelling 3+ / 4+</h4>3+: drop back one phase, ice + elevate. 4+: contact surgeon.</div>
+</div>
+</details>
+
 <!-- RULES -->
 <div class="rules">
   <h2>Progression &amp; Stop Rules</h2>
@@ -736,8 +706,125 @@
     <li><b>Mirror every drill.</b> The operated leg must match the healthy side in smoothness and confidence before its loading increases.</li>
     <li><b>Phase gates:</b> enter Phase 2 only if all Phase 1 drills are pain-free for 2 consecutive sessions; same rule for Phase 3. Heel hooks require 2 pain-free drop-knee sessions first.</li>
     <li><b>Confirm clearance.</b> Twisting/pivoting progression (Phase 2 onward) should align with your surgical team's return-to-sport guidance.</li>
+    <li><b>Swelling outranks pain.</b> Grade it every session: 2+ = no progression this week; 3+ = drop back a phase; 4+ = call the surgeon. Any next-morning swelling increase = repeat previous week.</li>
+    <li><b>YBT-A gates all impact.</b> No walk–jog until SSD ≤8 cm and depth ≥55% LL; no continuous running until SSD ≤4 cm. Retest every 2–3 weeks. Knee flexion under load ≤70° through week 16.</li>
   </ol>
 </div>
+
+<!-- MOVEMENT KEY -->
+<details class="sec">
+<summary><h2>Movement Key <span class="tag" style="background:var(--blue-soft);color:var(--blue)">Blue = key limb</span></h2></summary>
+<p class="sub">Schematic body positions referenced in the drill tables. Dots are systems-grid holds; the blue limb is the one doing the knee-relevant work.</p>
+<div class="movekey">
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Straight-on position, feet under hips">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="100" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="100" cy="70" r="4"/>
+      <circle class="hold" cx="42" cy="134" r="4"/><circle class="hold" cx="78" cy="134" r="4"/>
+      <line class="fig" x1="60" y1="60" x2="28" y2="24"/><line class="fig" x1="60" y1="60" x2="92" y2="24"/>
+      <line class="fig" x1="60" y1="55" x2="60" y2="90"/>
+      <line class="fig-acc" x1="60" y1="90" x2="43" y2="130"/><line class="fig-acc" x1="60" y1="90" x2="77" y2="130"/>
+      <circle class="head" cx="60" cy="44" r="8"/>
+    </svg>
+    <h5>Straight-On</h5>
+    <span class="stat ok">Wk 1+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Downclimbing with control">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="90" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="90" cy="70" r="4"/>
+      <circle class="hold" cx="36" cy="134" r="4"/><circle class="hold" cx="72" cy="134" r="4"/>
+      <line class="fig" x1="54" y1="62" x2="24" y2="24"/><line class="fig" x1="54" y1="62" x2="84" y2="24"/>
+      <line class="fig" x1="54" y1="57" x2="54" y2="92"/>
+      <line class="fig" x1="54" y1="92" x2="37" y2="130"/><line class="fig" x1="54" y1="92" x2="71" y2="130"/>
+      <circle class="head" cx="54" cy="46" r="8"/>
+      <line class="fig-acc" x1="108" y1="40" x2="108" y2="112"/>
+      <polyline class="fig-acc" points="100,102 108,114 116,102"/>
+    </svg>
+    <h5>Downclimb</h5>
+    <span class="stat ok">Every rep</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Backstep on outside edge">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="95" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="95" cy="70" r="4"/>
+      <circle class="hold" cx="42" cy="134" r="4"/><circle class="hold" cx="88" cy="134" r="4"/>
+      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="89" y2="24"/>
+      <line class="fig" x1="58" y1="55" x2="62" y2="90"/>
+      <line class="fig" x1="62" y1="90" x2="44" y2="130"/>
+      <polyline class="fig-acc" points="62,90 76,108 87,130"/>
+      <circle class="head" cx="56" cy="44" r="8"/>
+    </svg>
+    <h5>Backstep</h5>
+    <span class="stat cau">Wk 4+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Outside flag with straight leg">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="88" cy="18" r="4"/>
+      <circle class="hold" cx="20" cy="70" r="4"/><circle class="hold" cx="88" cy="70" r="4"/>
+      <circle class="hold" cx="44" cy="134" r="4"/>
+      <line class="fig" x1="55" y1="60" x2="26" y2="24"/><line class="fig" x1="55" y1="60" x2="82" y2="24"/>
+      <line class="fig" x1="55" y1="55" x2="55" y2="90"/>
+      <line class="fig" x1="55" y1="90" x2="45" y2="130"/>
+      <line class="fig-acc" x1="55" y1="90" x2="104" y2="118"/>
+      <circle class="head" cx="55" cy="44" r="8"/>
+    </svg>
+    <h5>Outside Flag</h5>
+    <span class="stat cau">Wk 4+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="High step to mid-thigh hold">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="92" cy="18" r="4"/>
+      <circle class="hold" cx="96" cy="96" r="4"/>
+      <circle class="hold" cx="42" cy="134" r="4"/>
+      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="86" y2="24"/>
+      <line class="fig" x1="58" y1="55" x2="58" y2="90"/>
+      <line class="fig" x1="58" y1="90" x2="43" y2="130"/>
+      <polyline class="fig-acc" points="58,90 80,74 94,93"/>
+      <circle class="head" cx="58" cy="44" r="8"/>
+    </svg>
+    <h5>High Step</h5>
+    <span class="stat cau">Wk 5+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Shallow drop knee, knee rotated downward">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="92" cy="18" r="4"/>
+      <circle class="hold" cx="100" cy="98" r="4"/>
+      <circle class="hold" cx="40" cy="134" r="4"/>
+      <line class="fig" x1="58" y1="60" x2="26" y2="24"/><line class="fig" x1="58" y1="60" x2="86" y2="24"/>
+      <line class="fig" x1="58" y1="55" x2="58" y2="90"/>
+      <line class="fig" x1="58" y1="90" x2="41" y2="130"/>
+      <polyline class="fig-acc" points="58,90 82,122 99,101"/>
+      <circle class="head" cx="58" cy="44" r="8"/>
+    </svg>
+    <h5>Drop Knee</h5>
+    <span class="stat cau">Wk 7+</span>
+  </div>
+
+  <div class="mk">
+    <svg viewBox="0 0 120 150" role="img" aria-label="Heel hook at hip height">
+      <circle class="hold" cx="20" cy="18" r="4"/><circle class="hold" cx="88" cy="18" r="4"/>
+      <circle class="hold" cx="102" cy="86" r="4"/>
+      <circle class="hold" cx="40" cy="134" r="4"/>
+      <line class="fig" x1="55" y1="60" x2="26" y2="24"/><line class="fig" x1="55" y1="60" x2="82" y2="24"/>
+      <line class="fig" x1="55" y1="55" x2="55" y2="90"/>
+      <line class="fig" x1="55" y1="90" x2="41" y2="130"/>
+      <polyline class="fig-acc" points="55,90 80,94 100,86"/>
+      <circle class="fig-acc" cx="101" cy="86" r="3" style="fill:var(--blue)"/>
+      <circle class="head" cx="55" cy="44" r="8"/>
+    </svg>
+    <h5>Heel Hook</h5>
+    <span class="stat no">Wk 8+ only</span>
+  </div>
+
+</div>
+</details>
 
 <script>
 (function(){
@@ -758,8 +845,13 @@
       b.classList.add('on'); cb(b.dataset.v);
     });
   }
-  segInit('type-btns',function(v){typeV=v});
+  segInit('type-btns',function(v){
+    typeV=v;
+    document.getElementById('ybt-fields').style.display = v==='YBT' ? '' : 'none';
+  });
   segInit('phase-btns',function(v){phaseV=v});
+  var swellV='0';
+  segInit('swell-btns',function(v){swellV=v});
 
   var painEl=document.getElementById('log-pain');
   painEl.addEventListener('input',function(){ document.getElementById('pain-val').textContent=painEl.value; });
@@ -776,10 +868,11 @@
     var ws=weekStart(new Date());
     var wkEntries=data.filter(function(e){ return new Date(e.date+'T12:00')>=ws; });
     var wkClimb=wkEntries.filter(function(e){return e.type==='A'||e.type==='B'}).length;
-    var wkBike=wkEntries.length-wkClimb;
+    var wkBike=wkEntries.filter(function(e){return String(e.type).charAt(0)==='R'}).length;
+    var wkPT=wkEntries.filter(function(e){return e.type==='PT'}).length;
     var stw=document.getElementById('st-week');
-    stw.textContent=wkEntries.length+' / 5';
-    stw.title='Climb '+wkClimb+'/2 · Bike '+wkBike+'/3';
+    stw.textContent=(wkClimb+wkBike)+' / 5';
+    stw.title='Climb '+wkClimb+'/2 · Bike '+wkBike+'/3 · PT '+wkPT;
 
     var last5=data.slice(0,5);
     document.getElementById('st-pain').textContent=last5.length?(last5.reduce(function(s,e){return s+e.pain},0)/last5.length).toFixed(1):'—';
@@ -803,13 +896,23 @@
       var flagBtn = e.flag24===true ? '<button class="flag-on" data-act="flag" data-id="'+e.id+'">⚠ 24h: swelling/pain</button>'
                   : e.flag24===false ? '<button class="flag-ok" data-act="flag" data-id="'+e.id+'">✓ 24h: clear</button>'
                   : '<button data-act="flag" data-id="'+e.id+'">24h check — tap tomorrow</button>';
-      var tCls = e.type==='A' ? 'a' : (e.type==='B' ? 'b' : 'r');
-      var tLbl = e.type==='A' ? 'Climb A' : (e.type==='B' ? 'Climb B' : 'Ride '+String(e.type).slice(1));
+      var tCls = e.type==='A' ? 'a' : (e.type==='B' ? 'b' : (e.type==='PT' ? 'pt' : (e.type==='YBT' ? 'ybt' : 'r')));
+      var tLbl = e.type==='A' ? 'Climb A' : (e.type==='B' ? 'Climb B' : (e.type==='PT' ? 'PT' : (e.type==='YBT' ? 'YBT-A' : 'Ride '+String(e.type).slice(1))));
+      var extraChips='';
+      if(e.swell!=null){
+        extraChips+='<span class="chip '+(e.swell<=1?'pain-lo':(e.swell===2?'pain-md':'pain-hi'))+'">Swell '+e.swell+(e.swell>0?'+':'')+'</span>';
+      }
+      if(e.type==='YBT'&&e.ll>0){
+        var ssd=Math.abs(e.reachL-e.reachR);
+        var pmin=Math.min(e.reachL,e.reachR)/e.ll*100;
+        extraChips+='<span class="chip '+(ssd<=4?'pain-lo':(ssd<=8?'pain-md':'pain-hi'))+'">SSD '+ssd.toFixed(1)+' cm</span>'+
+                    '<span class="chip '+(pmin>=55?'pain-lo':'pain-md')+'">'+pmin.toFixed(0)+'% LL</span>';
+      }
       div.innerHTML =
         '<div class="entry-top"><span class="d">'+fmt(e.date)+'</span>'+
         '<span class="chip '+tCls+'">'+tLbl+'</span>'+
         '<span class="chip p">Phase '+e.phase+'</span>'+
-        '<span class="chip '+painChip(e.pain)+'">Pain '+e.pain+'</span></div>'+
+        '<span class="chip '+painChip(e.pain)+'">Pain '+e.pain+'</span>'+extraChips+'</div>'+
         (e.notes?'<div class="note-txt">'+esc(e.notes)+'</div>':'')+
         '<div class="entry-actions">'+flagBtn+
         '<button data-act="del" data-id="'+e.id+'">Delete</button></div>';
@@ -819,11 +922,25 @@
 
   document.getElementById('save-btn').addEventListener('click',function(){
     var data=load();
-    data.push({ id:Date.now(), date:dateEl.value, type:typeV, phase:phaseV,
-      pain:parseInt(painEl.value,10), notes:document.getElementById('log-notes').value.trim(), flag24:null });
+    var entry={ id:Date.now(), date:dateEl.value, type:typeV, phase:phaseV,
+      pain:parseInt(painEl.value,10), swell:parseInt(swellV,10),
+      notes:document.getElementById('log-notes').value.trim(), flag24:null };
+    if(typeV==='YBT'){
+      var ll=parseFloat(document.getElementById('ybt-ll').value);
+      var rl=parseFloat(document.getElementById('ybt-l').value);
+      var rr=parseFloat(document.getElementById('ybt-r').value);
+      if(!(ll>0&&rl>0&&rr>0)){ alert('Enter leg length and both reach distances for the YBT-A.'); return; }
+      entry.ll=ll; entry.reachL=rl; entry.reachR=rr;
+    }
+    data.push(entry);
     store(data);
     document.getElementById('log-notes').value='';
     painEl.value=0; document.getElementById('pain-val').textContent='0';
+    swellV='0';
+    document.querySelectorAll('#swell-btns button').forEach(function(b){ b.classList.toggle('on', b.dataset.v==='0'); });
+    ['ybt-ll','ybt-l','ybt-r'].forEach(function(i){ document.getElementById(i).value=''; });
+    if(entry.swell>=3) alert('Swelling '+entry.swell+'+ logged. Per the PT protocol: drop back a phase, ice + elevate'+(entry.swell>=4?' — and contact your surgeon.':'.'));
+    else if(entry.swell===2) alert('Swelling 2+ logged — reduce intensity and do not progress this week.');
     render();
     if(data.length>0 && data.length%5===0){
       if(confirm('You\u2019ve logged '+data.length+' sessions \u2014 download a JSON backup file? (Safari can purge site storage after long inactivity.)')) doExport();
@@ -919,9 +1036,7 @@
     var wk=Math.floor(days/7)+1;
     var ph=wk<=3?1:(wk<=6?2:3);
     badge.textContent='Week '+wk+' \u00b7 Phase '+ph;
-    [1,2,3].forEach(function(n){
-      var d=document.getElementById('phase'+n); if(d) d.open=(n===ph);
-    });
+    
     phaseV=String(ph);
     document.querySelectorAll('#phase-btns button').forEach(function(b){
       b.classList.toggle('on', b.dataset.v===phaseV);
@@ -998,7 +1113,7 @@
     el.addEventListener('click',function(){
       var t=el.getAttribute('data-target'), node;
       if(t==='phase'){
-        node=document.querySelector('details.phase[open]')||document.getElementById('phase1');
+        node=document.querySelector('details.phase[open]')||document.getElementById('phase'+phaseV)||document.getElementById('phase1');
       } else {
         node=document.querySelector(t);
       }
@@ -1006,6 +1121,16 @@
       if(node.tagName==='DETAILS') node.open=true;
       var d=node.closest('details'); if(d) d.open=true;
       node.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+
+  // Accordion: only one section open at a time
+  document.querySelectorAll('details.sec').forEach(function(d){
+    d.addEventListener('toggle',function(){
+      if(!d.open) return;
+      document.querySelectorAll('details.sec[open]').forEach(function(o){
+        if(o!==d) o.open=false;
+      });
     });
   });
 

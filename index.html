@@ -8,24 +8,24 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Knee Plan">
-<meta name="theme-color" content="#17202B">
+<meta name="theme-color" content="#10161D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#EEF1F4;
-    --card:#FFFFFF;
-    --ink:#17202B;
-    --ink-soft:#4B5866;
-    --line:#D6DDE4;
-    --blue:#2456E6;
-    --blue-soft:#E4EBFD;
-    --green:#1E8A5A;
-    --green-soft:#E2F3EA;
-    --amber:#B87A0E;
-    --amber-soft:#FBF0DA;
-    --red:#C43D3D;
-    --red-soft:#FBE7E7;
+    --bg:#10161D;
+    --card:#1A222C;
+    --ink:#E8EDF2;
+    --ink-soft:#9AA7B4;
+    --line:#2C3742;
+    --blue:#5E8BFF;
+    --blue-soft:#1E2B4A;
+    --green:#3FBF87;
+    --green-soft:#15352A;
+    --amber:#E2A33C;
+    --amber-soft:#3A2E14;
+    --red:#E06666;
+    --red-soft:#3D1F1F;
     --mono:'IBM Plex Mono',monospace;
     --disp:'Barlow Condensed',sans-serif;
     --body:'Public Sans',sans-serif;
@@ -72,7 +72,7 @@
   .card-h h3{font-family:var(--disp);font-size:19px;text-transform:uppercase;letter-spacing:.03em}
   .card-h .freq{font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
   table{width:100%;border-collapse:collapse;font-size:13.5px}
-  th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600;background:#FAFBFC}
+  th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:600;background:#151D26}
   td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
   tr:last-child td{border-bottom:none}
   td.num{font-family:var(--mono);font-size:12.5px;white-space:nowrap;font-weight:500}
@@ -82,7 +82,7 @@
   .knee.cau{background:var(--amber-soft);color:var(--amber)}
 
   /* ---------- rules ---------- */
-  .rules{background:var(--ink);color:#E9EEF3;border-radius:10px;padding:20px 20px 16px;margin-top:34px}
+  .rules{background:#0C1218;border:1px solid var(--line);color:#E9EEF3;border-radius:10px;padding:20px 20px 16px;margin-top:34px}
   .rules h2{color:#fff;margin:0 0 12px}
   .rules ol{list-style:none;counter-reset:r}
   .rules li{counter-increment:r;display:flex;gap:14px;padding:9px 0;border-top:1px solid rgba(255,255,255,.14);font-size:13.5px}
@@ -110,9 +110,9 @@
   .day .act{font-family:var(--disp);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;line-height:1.15;border-radius:5px;padding:6px 2px}
   .day .act small{display:block;font-family:var(--mono);font-size:8.5px;font-weight:500;letter-spacing:.04em;margin-top:2px;text-transform:none}
   .act.climb-a{background:var(--blue-soft);color:var(--blue)}
-  .act.climb-b{background:#EFE7FB;color:#7A4FD1}
+  .act.climb-b{background:#2A2144;color:#B79BF0}
   .act.bike{background:var(--amber-soft);color:var(--amber)}
-  .act.rest{background:#F0F2F5;color:var(--ink-soft)}
+  .act.rest{background:#232C37;color:var(--ink-soft)}
   .act[data-target]{cursor:pointer;-webkit-tap-highlight-color:transparent}
   .act[data-target]:active{opacity:.75}
   #ride1,#ride2,#ride3,#endurance,#phase1,#phase2,#phase3{scroll-margin-top:12px}
@@ -122,12 +122,12 @@
   /* ---------- plan start / week badge ---------- */
   .start-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 12px;flex-wrap:wrap}
   .start-row label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
-  .start-row input{border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-family:var(--body);font-size:13px;background:#FAFBFC;-webkit-appearance:none;appearance:none;height:36px;min-width:0}
+  .start-row input{border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-family:var(--body);font-size:13px;background:#151D26;-webkit-appearance:none;appearance:none;height:36px;min-width:0}
   .start-row .wkbadge{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:600;background:var(--blue-soft);color:var(--blue);padding:5px 11px;border-radius:5px;white-space:nowrap}
 
   /* ---------- rest timer ---------- */
   .t-timer{color:var(--blue);text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  #timerbar{position:fixed;left:12px;right:12px;bottom:14px;max-width:836px;margin:0 auto;background:var(--ink);color:#fff;border-radius:10px;padding:13px 18px;display:none;align-items:center;gap:14px;font-family:var(--mono);z-index:50;box-shadow:0 8px 22px rgba(23,32,43,.3);cursor:pointer}
+  #timerbar{position:fixed;left:12px;right:12px;bottom:14px;max-width:836px;margin:0 auto;background:#0C1218;border:1px solid var(--line);color:#fff;border-radius:10px;padding:13px 18px;display:none;align-items:center;gap:14px;font-family:var(--mono);z-index:50;box-shadow:0 8px 22px rgba(23,32,43,.3);cursor:pointer}
   #timerbar.on{display:flex}
   #timerbar.done{background:var(--green)}
   #timerbar b{font-size:24px;font-weight:600;letter-spacing:.02em}
@@ -147,21 +147,21 @@
   .log-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .lf{display:flex;flex-direction:column;gap:5px;min-width:0}
   .lf label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
-  .lf input[type=date],.lf textarea{border:1px solid var(--line);border-radius:6px;padding:9px 10px;font-family:var(--body);font-size:14px;color:var(--ink);background:#FAFBFC;width:100%}
+  .lf input[type=date],.lf textarea{border:1px solid var(--line);border-radius:6px;padding:9px 10px;font-family:var(--body);font-size:14px;color:var(--ink);background:#151D26;width:100%}
   .lf input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;height:41px;text-align:left;display:block;-webkit-text-align:left}
   .lf input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
   .lf textarea{resize:vertical;min-height:56px}
   .lf.full{grid-column:1 / -1}
   .seg-btns{display:flex;gap:6px;flex-wrap:wrap}
-  .seg-btns button{flex:1;min-width:72px;border:1px solid var(--line);background:#FAFBFC;border-radius:6px;padding:9px 4px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;white-space:nowrap}
-  .seg-btns button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .seg-btns button{flex:1;min-width:72px;border:1px solid var(--line);background:#151D26;border-radius:6px;padding:9px 4px;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+  .seg-btns button.on{background:#2456E6;border-color:#2456E6;color:#fff}
   .pain-row{display:flex;align-items:center;gap:12px}
   .pain-row input[type=range]{flex:1;accent-color:var(--blue)}
   .pain-val{font-family:var(--mono);font-size:16px;font-weight:600;min-width:34px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:5px 0}
-  .save-btn{grid-column:1 / -1;background:var(--ink);color:#fff;border:none;border-radius:6px;padding:13px;font-family:var(--disp);font-size:17px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
+  .save-btn{grid-column:1 / -1;background:#2456E6;color:#fff;border:none;border-radius:6px;padding:13px;font-family:var(--disp);font-size:17px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
   .save-btn:active{opacity:.85}
   .log-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 4px}
-  .stat-box{background:#FAFBFC;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
+  .stat-box{background:#151D26;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}
   .stat-box b{display:block;font-family:var(--mono);font-size:19px;font-weight:600}
   .stat-box span{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
   .trend{display:flex;align-items:flex-end;gap:3px;height:36px;margin:10px 0 2px}
@@ -173,22 +173,22 @@
   .entry-top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-family:var(--mono);font-size:11.5px}
   .entry-top .d{font-weight:600}
   .chip{font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:3px}
-  .chip.a{background:var(--blue-soft);color:var(--blue)} .chip.b{background:#EFE7FB;color:#7A4FD1} .chip.r{background:var(--amber-soft);color:var(--amber)}
-  .chip.p{background:#F0F2F5;color:var(--ink-soft)}
+  .chip.a{background:var(--blue-soft);color:var(--blue)} .chip.b{background:#2A2144;color:#B79BF0} .chip.r{background:var(--amber-soft);color:var(--amber)}
+  .chip.p{background:#232C37;color:var(--ink-soft)}
   .chip.pain-lo{background:var(--green-soft);color:var(--green)} .chip.pain-md{background:var(--amber-soft);color:var(--amber)} .chip.pain-hi{background:var(--red-soft);color:var(--red)}
   .entry .note-txt{color:var(--ink-soft);margin-top:5px;font-size:12.5px}
   .entry-actions{display:flex;gap:8px;margin-top:8px}
-  .entry-actions button{border:1px solid var(--line);background:#FAFBFC;border-radius:5px;padding:4px 10px;font-family:var(--mono);font-size:10.5px;font-weight:600;cursor:pointer;color:var(--ink-soft)}
+  .entry-actions button{border:1px solid var(--line);background:#151D26;border-radius:5px;padding:4px 10px;font-family:var(--mono);font-size:10.5px;font-weight:600;cursor:pointer;color:var(--ink-soft)}
   .entry-actions button.flag-on{background:var(--red-soft);border-color:var(--red);color:var(--red)}
   .entry-actions button.flag-ok{background:var(--green-soft);border-color:var(--green);color:var(--green)}
   .log-tools{display:flex;gap:8px;margin-top:14px}
-  .log-tools button{flex:1;border:1px solid var(--line);background:#FAFBFC;border-radius:6px;padding:9px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .log-tools button{flex:1;border:1px solid var(--line);background:#151D26;border-radius:6px;padding:9px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink-soft);cursor:pointer}
   .empty-log{text-align:center;color:var(--ink-soft);font-size:13px;padding:14px 0;font-family:var(--mono)}
   @media (max-width:560px){.log-form{grid-template-columns:1fr}.log-stats{grid-template-columns:repeat(3,1fr)}}
 
   footer{margin-top:26px;font-size:12px;color:var(--ink-soft);font-family:var(--mono);line-height:1.7}
 
-  @media print{body{background:#fff}.wrap{padding:0}.card,.clock{break-inside:avoid}}
+  @media print{body{background:#fff;color:#17202B}.wrap{padding:0}.card,.clock{break-inside:avoid}}
   @media (max-width:560px){
     th:nth-child(4),td:nth-child(4){display:none}
     .seg span{display:none}
@@ -230,7 +230,7 @@
 </div>
 
 <!-- SESSION LOG -->
-<h2>Session Log <span class="tag" style="background:#F0F2F5;color:var(--ink-soft)">Saved on this device</span></h2>
+<h2>Session Log <span class="tag" style="background:#232C37;color:var(--ink-soft)">Saved on this device</span></h2>
 <p class="sub">Log every session with a pain score, then come back the next morning and tap the 24h check on the entry — that's the flag that governs the progression rules. Data lives in this browser's storage; use Export for a backup.</p>
 
 <div class="log">
@@ -296,7 +296,7 @@
     <div class="seg" style="flex:15;background:#4B5866"><span>Warm-up traverse</span><b>0–15</b></div>
     <div class="seg" style="flex:30;background:#2456E6"><span>Mirrored drills A+B</span><b>15–45</b></div>
     <div class="seg" style="flex:8;background:#1E8A5A"><span>Hangboard</span><b>45–53</b></div>
-    <div class="seg" style="flex:7;background:#17202B"><span>Core</span><b>53–60</b></div>
+    <div class="seg" style="flex:7;background:#55616F"><span>Core</span><b>53–60</b></div>
   </div>
   <div class="ticks">
     <div style="flex:15">0:00</div><div style="flex:30">0:15</div><div style="flex:8">0:45</div><div style="flex:7">0:53&nbsp;→&nbsp;1:00</div>
@@ -309,7 +309,7 @@
     <div class="seg" style="flex:15;background:#4B5866"><span>Warm-up traverse</span><b>0–15</b></div>
     <div class="seg" style="flex:25;background:#7A4FD1"><span>Endurance block</span><b>15–40</b></div>
     <div class="seg" style="flex:12;background:#2456E6"><span>Light technique drills</span><b>40–52</b></div>
-    <div class="seg" style="flex:8;background:#17202B"><span>Core</span><b>52–60</b></div>
+    <div class="seg" style="flex:8;background:#55616F"><span>Core</span><b>52–60</b></div>
   </div>
   <div class="ticks">
     <div style="flex:15">0:00</div><div style="flex:25">0:15</div><div style="flex:12">0:40</div><div style="flex:8">0:52&nbsp;→&nbsp;1:00</div>
@@ -576,7 +576,7 @@
 
 <!-- ENDURANCE -->
 <details class="sec" id="endurance">
-<summary><h2>Endurance <span class="tag" style="background:#EFE7FB;color:#7A4FD1">Session B · 15:00–40:00</span></h2></summary>
+<summary><h2>Endurance <span class="tag" style="background:#2A2144;color:#B79BF0">Session B · 15:00–40:00</span></h2></summary>
 <p class="sub">Endurance work runs on Session B each week and progresses alongside the drill phases. It's knee-friendly by design — low intensity, big holds, static feet — so it starts in Week 1. On ARC blocks you should be able to hold a conversation; a deep forearm pump means the wall is too steep or the holds too small.</p>
 
 <div class="card">

@@ -229,6 +229,66 @@
   </div>
 </div>
 
+<!-- SESSION LOG -->
+<h2>Session Log <span class="tag" style="background:#F0F2F5;color:var(--ink-soft)">Saved on this device</span></h2>
+<p class="sub">Log every session with a pain score, then come back the next morning and tap the 24h check on the entry — that's the flag that governs the progression rules. Data lives in this browser's storage; use Export for a backup.</p>
+
+<div class="log">
+  <div class="log-form">
+    <div class="lf">
+      <label for="log-date">Date</label>
+      <input type="date" id="log-date">
+    </div>
+    <div class="lf full">
+      <label>Session</label>
+      <div class="seg-btns" id="type-btns">
+        <button data-v="A" class="on">A · Strength</button>
+        <button data-v="B">B · Endur</button>
+        <button data-v="R1">R1 · Z2</button>
+        <button data-v="R2">R2 · SS</button>
+        <button data-v="R3">R3 · Long</button>
+      </div>
+    </div>
+    <div class="lf">
+      <label>Phase</label>
+      <div class="seg-btns" id="phase-btns">
+        <button data-v="1" class="on">1</button>
+        <button data-v="2">2</button>
+        <button data-v="3">3</button>
+      </div>
+    </div>
+    <div class="lf">
+      <label for="log-pain">Knee pain during session (0–10)</label>
+      <div class="pain-row">
+        <input type="range" id="log-pain" min="0" max="10" step="1" value="0">
+        <div class="pain-val" id="pain-val">0</div>
+      </div>
+    </div>
+    <div class="lf full">
+      <label for="log-notes">Notes — drills / intervals completed, cadence, what felt off</label>
+      <textarea id="log-notes" placeholder="e.g. Sweet spot 3×8 @ 210W done, 88rpm, knee quiet throughout"></textarea>
+    </div>
+    <button class="save-btn" id="save-btn">Save Session</button>
+  </div>
+
+  <div class="log-stats">
+    <div class="stat-box"><b id="st-total">0</b><span>Sessions</span></div>
+    <div class="stat-box"><b id="st-week">0 / 2</b><span>This week</span></div>
+    <div class="stat-box"><b id="st-pain">—</b><span>Avg pain · last 5</span></div>
+  </div>
+  <div class="trend" id="trend"></div>
+  <div class="trend-label" id="trend-label">Pain trend — last 10 sessions</div>
+
+  <div class="entries" id="entries"></div>
+
+  <div class="log-tools">
+    <button id="export-btn">Export JSON</button>
+    <button id="import-btn">Import JSON</button>
+    <input type="file" id="import-file" accept=".json,application/json,.txt" style="display:none">
+    <button id="clear-btn">Clear all</button>
+  </div>
+</div>
+
 <!-- SESSION CLOCK -->
 <div class="clock">
   <h3>Session A Clock — Strength &amp; Drills</h3>
@@ -679,64 +739,6 @@
   </ol>
 </div>
 
-<!-- SESSION LOG -->
-<h2>Session Log <span class="tag" style="background:#F0F2F5;color:var(--ink-soft)">Saved on this device</span></h2>
-<p class="sub">Log every session with a pain score, then come back the next morning and tap the 24h check on the entry — that's the flag that governs the progression rules. Data lives in this browser's storage; use Export for a backup.</p>
-
-<div class="log">
-  <div class="log-form">
-    <div class="lf">
-      <label for="log-date">Date</label>
-      <input type="date" id="log-date">
-    </div>
-    <div class="lf full">
-      <label>Session</label>
-      <div class="seg-btns" id="type-btns">
-        <button data-v="A" class="on">A · Strength</button>
-        <button data-v="B">B · Endur</button>
-        <button data-v="R1">R1 · Z2</button>
-        <button data-v="R2">R2 · SS</button>
-        <button data-v="R3">R3 · Long</button>
-      </div>
-    </div>
-    <div class="lf">
-      <label>Phase</label>
-      <div class="seg-btns" id="phase-btns">
-        <button data-v="1" class="on">1</button>
-        <button data-v="2">2</button>
-        <button data-v="3">3</button>
-      </div>
-    </div>
-    <div class="lf">
-      <label for="log-pain">Knee pain during session (0–10)</label>
-      <div class="pain-row">
-        <input type="range" id="log-pain" min="0" max="10" step="1" value="0">
-        <div class="pain-val" id="pain-val">0</div>
-      </div>
-    </div>
-    <div class="lf full">
-      <label for="log-notes">Notes — drills / intervals completed, cadence, what felt off</label>
-      <textarea id="log-notes" placeholder="e.g. Sweet spot 3×8 @ 210W done, 88rpm, knee quiet throughout"></textarea>
-    </div>
-    <button class="save-btn" id="save-btn">Save Session</button>
-  </div>
-
-  <div class="log-stats">
-    <div class="stat-box"><b id="st-total">0</b><span>Sessions</span></div>
-    <div class="stat-box"><b id="st-week">0 / 2</b><span>This week</span></div>
-    <div class="stat-box"><b id="st-pain">—</b><span>Avg pain · last 5</span></div>
-  </div>
-  <div class="trend" id="trend"></div>
-  <div class="trend-label" id="trend-label">Pain trend — last 10 sessions</div>
-
-  <div class="entries" id="entries"></div>
-
-  <div class="log-tools">
-    <button id="export-btn">Export JSON</button>
-    <button id="clear-btn">Clear all</button>
-  </div>
-</div>
-
 <script>
 (function(){
   var KEY='sbkr_log_v1';
@@ -855,6 +857,37 @@
     setTimeout(function(){URL.revokeObjectURL(url)},1000);
   }
   document.getElementById('export-btn').addEventListener('click',doExport);
+
+  document.getElementById('import-btn').addEventListener('click',function(){
+    document.getElementById('import-file').click();
+  });
+  document.getElementById('import-file').addEventListener('change',function(e){
+    var f=e.target.files[0]; if(!f) return;
+    var reader=new FileReader();
+    reader.onload=function(){
+      try{
+        var arr=JSON.parse(reader.result);
+        if(!Array.isArray(arr)) throw new Error('not an array');
+        var clean=arr.filter(function(x){ return x && x.date && x.type; });
+        if(!clean.length) throw new Error('no valid entries');
+        var data=load();
+        var ids={};
+        data.forEach(function(x){ ids[x.id]=true; });
+        var added=0;
+        clean.forEach(function(x){
+          if(!x.id) x.id=Date.now()+Math.floor(Math.random()*1000);
+          if(!ids[x.id]){ data.push(x); ids[x.id]=true; added++; }
+        });
+        store(data); render();
+        var skipped=clean.length-added;
+        alert('Imported '+added+' session'+(added===1?'':'s')+(skipped?' ('+skipped+' duplicate'+(skipped===1?'':'s')+' skipped)':'')+'.');
+      }catch(err){
+        alert('Could not import — file is not a valid log export.');
+      }
+      e.target.value='';
+    };
+    reader.readAsText(f);
+  });
 
   document.getElementById('clear-btn').addEventListener('click',function(){
     if(confirm('Delete ALL logged sessions? This cannot be undone.')){ store([]); render(); }

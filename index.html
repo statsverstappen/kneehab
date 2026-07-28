@@ -136,6 +136,14 @@
   #timerbar span{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
   @media (max-width:560px){.week{grid-template-columns:repeat(4,1fr)}.week .day:nth-child(n+5){grid-column:span 1}}
 
+  /* ---------- day view ---------- */
+  #dv-days{margin:12px 0 2px}
+  #dv-days button{min-width:42px;padding:8px 2px}
+  .dv-part{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin:18px 0 2px}
+  .dv-note{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13.5px;margin:10px 0}
+  #dv-why{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;margin:8px 0 0;display:none}
+  #dayview .clock{margin-top:10px}
+
   /* ---------- collapsible sections ---------- */
   details.sec>summary{list-style:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
   details.sec>summary::-webkit-details-marker{display:none}
@@ -236,6 +244,23 @@
   <p class="sub" style="margin:6px 0 0;font-size:12px">PT work stacks on existing days so hard days stay hard and rest days stay easy. PT strength rides along with the two climb sessions; balance drills follow rides; the Sunday YBT-A slot is only every 2–3 weeks.</p>
 </div>
 
+<!-- DAY VIEW -->
+<details class="sec" id="dayview" open>
+<summary><h2>Today's Session <span class="tag" style="background:var(--blue-soft);color:var(--blue)" id="dv-tag">—</span></h2></summary>
+<div class="seg-btns" id="dv-days">
+  <button data-d="1">Mon</button>
+  <button data-d="2">Tue</button>
+  <button data-d="3">Wed</button>
+  <button data-d="4">Thu</button>
+  <button data-d="5">Fri</button>
+  <button data-d="6">Sat</button>
+  <button data-d="0">Sun</button>
+</div>
+<div id="dv-why"></div>
+<p class="sub" id="dv-sub" style="margin:8px 0 0"></p>
+<div id="dv-body"></div>
+</details>
+
 <!-- SESSION LOG -->
 <h2>Session Log <span class="tag" style="background:#232C37;color:var(--ink-soft)">Saved on this device</span></h2>
 <p class="sub">Log every session with a pain score, then come back the next morning and tap the 24h check on the entry — that's the flag that governs the progression rules. Data lives in this browser's storage; use Export for a backup.</p>
@@ -317,7 +342,7 @@
 </div>
 
 <!-- SESSION CLOCK -->
-<div class="clock">
+<div class="clock" id="clockA">
   <h3>Session A Clock — Strength &amp; Drills</h3>
   <div class="bar">
     <div class="seg" style="flex:15;background:#4B5866"><span>Warm-up traverse</span><b>0–15</b></div>
@@ -330,7 +355,7 @@
   </div>
 </div>
 
-<div class="clock">
+<div class="clock" id="clockB">
   <h3>Session B Clock — Endurance</h3>
   <div class="bar">
     <div class="seg" style="flex:15;background:#4B5866"><span>Warm-up traverse</span><b>0–15</b></div>
@@ -551,7 +576,7 @@
 </details>
 
 <!-- FINISHER -->
-<details class="sec">
+<details class="sec" id="finisher">
 <summary><h2>Finisher <span class="tag" style="background:var(--blue-soft);color:var(--blue)">Session A · 45:00–60:00</span></h2></summary>
 <p class="sub">Full finisher on Session A only. On Session B, skip the hangboard (endurance volume already loads the fingers) and run just the three core/leg exercises from 52:00–60:00.</p>
 <div class="card">
@@ -652,7 +677,7 @@
   </table>
 </div>
 
-<div class="card">
+<div class="card" id="pt-str">
   <div class="card-h"><h3>PT Strength — stacks on Climb A &amp; B days</h3><span class="freq">Mon · Thu, after climbing</span></div>
   <table>
     <tr><th>Exercise</th><th>Dose</th><th>Notes</th></tr>
@@ -667,7 +692,7 @@
   </table>
 </div>
 
-<div class="card">
+<div class="card" id="pt-bal">
   <div class="card-h"><h3>Balance — after Ride 1 &amp; 2</h3><span class="freq">Tue · Fri, ~10 min</span></div>
   <table>
     <tr><th>Drill</th><th>Dose</th><th>Progression</th></tr>
@@ -849,7 +874,7 @@
     typeV=v;
     document.getElementById('ybt-fields').style.display = v==='YBT' ? '' : 'none';
   });
-  segInit('phase-btns',function(v){phaseV=v});
+  segInit('phase-btns',function(v){phaseV=v; renderDay();});
   var swellV='0';
   segInit('swell-btns',function(v){swellV=v});
 
@@ -942,6 +967,7 @@
     if(entry.swell>=3) alert('Swelling '+entry.swell+'+ logged. Per the PT protocol: drop back a phase, ice + elevate'+(entry.swell>=4?' — and contact your surgeon.':'.'));
     else if(entry.swell===2) alert('Swelling 2+ logged — reduce intensity and do not progress this week.');
     render();
+    dvAutoPick(); renderDay();
     if(data.length>0 && data.length%5===0){
       if(confirm('You\u2019ve logged '+data.length+' sessions \u2014 download a JSON backup file? (Safari can purge site storage after long inactivity.)')) doExport();
     }
@@ -959,7 +985,7 @@
       data[i].flag24 = data[i].flag24===null ? false : (data[i].flag24===false ? true : null);
       if(data[i].flag24===true) alert('24h flag set. Per the stop rules: repeat the previous week — do not progress.');
     }
-    store(data); render();
+    store(data); render(); renderDay();
   });
 
   function doExport(){
@@ -996,6 +1022,7 @@
           if(!ids[x.id]){ data.push(x); ids[x.id]=true; added++; }
         });
         store(data); render();
+        dvAutoPick(); renderDay();
         var skipped=clean.length-added;
         alert('Imported '+added+' session'+(added===1?'':'s')+(skipped?' ('+skipped+' duplicate'+(skipped===1?'':'s')+' skipped)':'')+'.');
       }catch(err){
@@ -1025,6 +1052,118 @@
     }
   })();
 
+  /* ---- composed day view ---- */
+  var DV_INFO={
+    1:{tag:'Climb A + PT',sub:'Strength & drills · ~60 min · full finisher, then PT strength stack.'},
+    2:{tag:'Ride 1 · Z2',sub:'Z2 aerobic in ERG · 85+ rpm, stay seated · balance drills after.'},
+    3:{tag:'Rest',sub:'Mobility + a 10–15 min easy walk. No training load.'},
+    4:{tag:'Climb B + PT',sub:'Endurance · ~60 min · core-only finisher, then PT strength stack.'},
+    5:{tag:'Ride 2 · SS',sub:'Sweet spot in ERG · 85–90 rpm, stay seated · balance drills after.'},
+    6:{tag:'Ride 3 · Long',sub:'Long Z2 + cadence surges · 90 rpm base.'},
+    0:{tag:'Rest',sub:'Full rest · YBT-A slot every 2–3 weeks.'}
+  };
+  var dvDay=new Date().getDay(), dvReason='';
+  var WEEK_PLAN=[{d:1,t:'A'},{d:2,t:'R1'},{d:4,t:'B'},{d:5,t:'R2'},{d:6,t:'R3'}];
+  var DAYN={1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat',0:'Sun'};
+  var SLBL={A:'Climb A',B:'Climb B',R1:'Ride 1',R2:'Ride 2',R3:'Ride 3'};
+  function weekLogged(){
+    var ws=weekStart(new Date()), s={};
+    load().forEach(function(e){ if(new Date(e.date+'T12:00')>=ws) s[e.type]=e.date; });
+    return s;
+  }
+  function dvAutoPick(){
+    var done=weekLogged();
+    var todayIdx=(new Date().getDay()+6)%7; // 0=Mon
+    var pend=WEEK_PLAN.filter(function(p){ return !done[p.t]; });
+    var overdue=pend.filter(function(p){ return (p.d+6)%7<=todayIdx; });
+    dvReason='';
+    if(overdue.length){
+      dvDay=overdue[0].d;
+      if((overdue[0].d+6)%7<todayIdx)
+        dvReason=SLBL[overdue[0].t]+' not done yet ('+DAYN[overdue[0].d]+' slot) — showing it today. Tap a day to override.';
+    } else {
+      dvDay=new Date().getDay();
+      var todayPlan=WEEK_PLAN.find(function(p){ return p.d===dvDay; });
+      if(todayPlan&&done[todayPlan.t]) dvReason='Today’s '+SLBL[todayPlan.t]+' is logged ✓';
+      if(!pend.length) dvReason='All 5 sessions logged this week ✓';
+    }
+  }
+  function dvClone(node){
+    if(!node) return null;
+    var c=node.cloneNode(true);
+    c.removeAttribute('id');
+    c.querySelectorAll('[id]').forEach(function(x){x.removeAttribute('id')});
+    c.querySelectorAll('[data-tmr]').forEach(function(x){x.removeAttribute('data-tmr')});
+    return c;
+  }
+  function dvLabel(t){ var d=document.createElement('div'); d.className='dv-part'; d.textContent=t; return d; }
+  function dvNote(h){ var d=document.createElement('div'); d.className='dv-note'; d.innerHTML=h; return d; }
+  function renderDay(){
+    var body=document.getElementById('dv-body'); if(!body) return;
+    body.innerHTML='';
+    var ph=parseInt(phaseV,10)||1;
+    var info=DV_INFO[dvDay];
+    document.getElementById('dv-tag').textContent=info.tag;
+    document.getElementById('dv-sub').textContent=info.sub;
+    var done=weekLogged();
+    document.querySelectorAll('#dv-days button').forEach(function(b){
+      var dd=Number(b.dataset.d);
+      var plan=WEEK_PLAN.find(function(p){ return p.d===dd; });
+      b.textContent=DAYN[dd]+(plan&&done[plan.t]?' ✓':'');
+      b.classList.toggle('on', dd===dvDay);
+    });
+    var why=document.getElementById('dv-why');
+    why.textContent=dvReason;
+    why.style.display=dvReason?'block':'none';
+    why.style.color=/✓/.test(dvReason)?'var(--green)':'var(--amber)';
+    function add(n){ if(n) body.appendChild(n); }
+    function climbGapNote(my){
+      var other=my==='A'?'B':'A';
+      if(!done[other]) return null;
+      var diff=Math.abs(new Date().setHours(12,0,0,0)-new Date(done[other]+'T12:00'))/86400000;
+      if(diff>=2) return null;
+      return dvNote('<b style="color:var(--amber)">48h spacing</b> — Climb '+other+' was logged '+fmt(done[other])+'. Keep 48h+ between the two climb sessions; consider swapping in a ride or rest day instead.');
+    }
+    if(dvDay===1){
+      add(climbGapNote('A'));
+      add(dvClone(document.getElementById('clockA')));
+      add(dvLabel('0:00–15:00 · Warm-up traverse — easy, static feet'));
+      add(dvLabel('15:00–45:00 · Phase '+ph+' drill blocks'));
+      document.querySelectorAll('#phase'+ph+' .card').forEach(function(c){ add(dvClone(c)); });
+      add(dvLabel('45:00–60:00 · Finisher — full'));
+      add(dvClone(document.querySelector('#finisher .card')));
+      add(dvLabel('After climbing · PT strength stack'));
+      add(dvClone(document.getElementById('pt-str')));
+    } else if(dvDay===4){
+      add(climbGapNote('B'));
+      add(dvClone(document.getElementById('clockB')));
+      add(dvLabel('0:00–15:00 · Warm-up traverse — easy, static feet'));
+      add(dvLabel('15:00–40:00 · Endurance · Phase '+ph));
+      add(dvClone(document.querySelectorAll('#endurance .card')[ph-1]));
+      add(dvNote('<b>40:00–52:00 · Light technique</b> — one Phase '+ph+' Block A drill at RPE 5.'));
+      add(dvLabel('52:00–60:00 · Core finisher — no hangboard'));
+      var fc=dvClone(document.querySelector('#finisher .card'));
+      if(fc){ var hb=fc.querySelector('table tr:nth-child(2)'); if(hb) hb.remove(); add(fc); }
+      add(dvLabel('After climbing · PT strength stack'));
+      add(dvClone(document.getElementById('pt-str')));
+    } else if(dvDay===2||dvDay===5){
+      add(dvClone(document.getElementById(dvDay===2?'ride1':'ride2')));
+      add(dvLabel('After the ride · Balance — ~10 min'));
+      add(dvClone(document.getElementById('pt-bal')));
+    } else if(dvDay===6){
+      add(dvClone(document.getElementById('ride3')));
+    } else if(dvDay===3){
+      add(dvNote('Rest day — gentle mobility and a 10–15 min easy walk. Nothing to log unless something feels off.'));
+    } else {
+      add(dvNote('Full rest. If it’s a YBT-A week (every 2–3 weeks): test both legs, best of 3, and log leg length + both reaches.'));
+    }
+    attachTimers(body);
+  }
+  document.getElementById('dv-days').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    dvDay=Number(b.dataset.d); dvReason=''; renderDay();
+  });
+
   /* ---- phase auto-tracking from plan start date ---- */
   var SKEY='sbkr_start_v1';
   var startEl2=document.getElementById('start-date');
@@ -1041,6 +1180,7 @@
     document.querySelectorAll('#phase-btns button').forEach(function(b){
       b.classList.toggle('on', b.dataset.v===phaseV);
     });
+    renderDay();
   }
   var sv=null; try{ sv=localStorage.getItem(SKEY) }catch(e){}
   if(sv) startEl2.value=sv;
@@ -1094,14 +1234,19 @@
     if(tInt){ clearInterval(tInt); tInt=null; }
     bar.classList.remove('on','done');
   });
-  document.querySelectorAll('td.num').forEach(function(td){
-    var m=td.textContent.trim().match(/^(\d{1,2}):(\d{2})\b/);
-    if(!m || td.textContent.indexOf('\u00d7')>-1) return;
-    td.classList.add('t-timer'); td.title='Tap to start timer';
-    td.addEventListener('click',function(){
-      startTimer(parseInt(m[1],10)*60 + parseInt(m[2],10));
+  function attachTimers(root){
+    root.querySelectorAll('td.num').forEach(function(td){
+      if(td.dataset.tmr) return;
+      var m=td.textContent.trim().match(/^(\d{1,2}):(\d{2})\b/);
+      if(!m || td.textContent.indexOf('\u00d7')>-1) return;
+      td.dataset.tmr='1';
+      td.classList.add('t-timer'); td.title='Tap to start timer';
+      td.addEventListener('click',function(){
+        startTimer(parseInt(m[1],10)*60 + parseInt(m[2],10));
+      });
     });
-  });
+  }
+  attachTimers(document);
 
   /* ---- offline: register service worker ---- */
   if('serviceWorker' in navigator){
@@ -1135,6 +1280,8 @@
   });
 
   render();
+  dvAutoPick();
+  renderDay();
 })();
 </script>
 

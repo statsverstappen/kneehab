@@ -1,6 +1,6 @@
 // Service worker for Kneehab
 // Strategy: cache-first with background revalidation (stale-while-revalidate)
-const CACHE = 'kneehab-v2';
+const CACHE = 'kneehab-v3';
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();

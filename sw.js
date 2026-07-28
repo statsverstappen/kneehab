@@ -1,12 +1,12 @@
 // Service worker for Kneehab
 // Strategy: cache-first with background revalidation (stale-while-revalidate)
-const CACHE = 'kneehab-v3';
+const CACHE = 'kneehab-v4';
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
-      return c.addAll(['./']);
+      return c.addAll(['./', './manifest.json', './icon-180.png', './icon-192.png', './icon-512.png']);
     })
   );
 });

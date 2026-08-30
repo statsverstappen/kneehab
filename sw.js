@@ -1,39 +1,54 @@
-// Service worker for Kneehab
-// Strategy: cache-first with background revalidation (stale-while-revalidate)
-const CACHE = 'kneehab-v4';
+/* Kneehab · service worker
+   Cache-first for the app shell so a session works with no signal at the gym,
+   with a background refresh so a deploy is picked up on the next load. */
 
-self.addEventListener('install', function (e) {
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(function (c) {
-      return c.addAll(['./', './manifest.json', './icon-180.png', './icon-192.png', './icon-512.png']);
-    })
+const CACHE = 'kneehab-v2-1';
+const ASSETS = [
+  './',
+  './index.html',
+  './app.css',
+  './app.js',
+  './protocol.js',
+  './engine.js',
+  './garmin.js',
+  './fit.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-180.png'
+];
+
+self.addEventListener('install', ev => {
+  ev.waitUntil(
+    caches.open(CACHE)
+      .then(c => Promise.allSettled(ASSETS.map(a => c.add(a))))
+      .then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', function (e) {
-  e.waitUntil(
-    caches.keys().then(function (keys) {
-      return Promise.all(
-        keys.filter(function (k) { return k !== CACHE; })
-            .map(function (k) { return caches.delete(k); })
-      );
-    }).then(function () { return self.clients.claim(); })
+self.addEventListener('activate', ev => {
+  ev.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', function (e) {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(function (cached) {
-      var fresh = fetch(e.request).then(function (res) {
-        if (res && (res.status === 200 || res.type === 'opaque')) {
-          var clone = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(e.request, clone); });
+self.addEventListener('fetch', ev => {
+  const req = ev.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return; // let fonts go to the network
+
+  ev.respondWith(
+    caches.match(req).then(hit => {
+      const network = fetch(req).then(res => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy));
         }
         return res;
-      }).catch(function () { return cached; });
-      return cached || fresh;
+      }).catch(() => hit);
+      return hit || network;
     })
   );
 });

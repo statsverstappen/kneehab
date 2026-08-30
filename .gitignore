@@ -1,0 +1,5 @@
+# personal training log exports, keep these off the public repo
+kneehablog_*.json
+backups/
+tools/
+.DS_Store

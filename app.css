@@ -1,0 +1,214 @@
+/* Kneehab v2 · app.css */
+
+:root{
+  --bg:#10161D;
+  --card:#1A222C;
+  --card-2:#151C25;
+  --ink:#E8EDF2;
+  --ink-soft:#9AA7B4;
+  --ink-mute:#6E7C8A;
+  --line:#2C3742;
+  --blue:#5E8BFF;
+  --blue-soft:#1E2B4A;
+  --green:#3FBF87;
+  --green-soft:#15352A;
+  --amber:#E2A33C;
+  --amber-soft:#3A2E14;
+  --red:#E06666;
+  --red-soft:#3D1F1F;
+  /* categorical series, validated for CVD separation on the card surface */
+  --s1:#5E8BFF;
+  --s2:#DE5F97;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --disp:'Barlow Condensed',sans-serif;
+  --body:'Public Sans',system-ui,sans-serif;
+  --r:10px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--body);
+  font-size:15px; line-height:1.5; -webkit-text-size-adjust:100%;
+  padding-bottom:80px;
+}
+h1,h2,h3,h4{font-family:var(--disp); text-transform:uppercase; letter-spacing:.04em; margin:0; font-weight:600}
+a{color:var(--blue)}
+button{font-family:inherit; font-size:inherit; color:inherit; cursor:pointer}
+table{border-collapse:collapse; width:100%}
+.wrap{max-width:880px; margin:0 auto; padding:0 16px}
+
+/* ---------- header + nav ---------- */
+header.top{border-bottom:1px solid var(--line); background:var(--card-2); position:sticky; top:0; z-index:30}
+.top-in{display:flex; align-items:center; gap:12px; padding:12px 16px; max-width:880px; margin:0 auto}
+.brand{font-family:var(--disp); font-size:26px; letter-spacing:.06em; line-height:1}
+.brand small{display:block; font-family:var(--body); font-size:11px; letter-spacing:.02em; text-transform:none; color:var(--ink-soft); margin-top:2px}
+.top-right{margin-left:auto; text-align:right; font-family:var(--mono); font-size:11px; color:var(--ink-soft)}
+nav.tabs{display:flex; gap:2px; overflow-x:auto; padding:0 16px 0; max-width:880px; margin:0 auto; scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{
+  background:none; border:0; border-bottom:2px solid transparent; color:var(--ink-soft);
+  font-family:var(--disp); font-size:15px; text-transform:uppercase; letter-spacing:.05em;
+  padding:10px 12px; white-space:nowrap;
+}
+nav.tabs button.on{color:var(--ink); border-bottom-color:var(--blue)}
+
+/* ---------- cards ---------- */
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:16px; margin:14px 0}
+.card > h3{font-size:15px; margin-bottom:4px}
+.cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-mute)}
+.muted{color:var(--ink-soft)}
+.small{font-size:13px}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.spacer{flex:1}
+.grid2{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.grid3{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px}
+
+/* ---------- readiness hero ---------- */
+.hero{display:flex; gap:18px; align-items:center; flex-wrap:wrap}
+.dial{width:112px; height:112px; flex:none; position:relative}
+.dial svg{transform:rotate(-90deg)}
+.dial .val{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-family:var(--disp); line-height:1
+}
+.dial .val b{font-size:34px; font-weight:700}
+.dial .val span{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; color:var(--ink-mute); margin-top:3px}
+.hero-txt{flex:1; min-width:200px}
+.band-pill{
+  display:inline-flex; align-items:center; gap:7px; border-radius:999px;
+  padding:5px 13px 5px 10px; font-family:var(--disp); font-size:16px; letter-spacing:.06em;
+}
+.band-pill i{width:9px; height:9px; border-radius:50%; background:currentColor; flex:none}
+.band-green{background:var(--green-soft); color:var(--green)}
+.band-amber{background:var(--amber-soft); color:var(--amber)}
+.band-red{background:var(--red-soft); color:var(--red)}
+.band-unknown{background:#222b36; color:var(--ink-soft)}
+
+/* ---------- component meters ---------- */
+.comp{display:grid; grid-template-columns:1fr auto; gap:2px 10px; padding:9px 0; border-bottom:1px solid var(--line)}
+.comp:last-child{border-bottom:0}
+.comp .nm{font-size:14px}
+.comp .sc{font-family:var(--mono); font-size:12px; color:var(--ink-soft); text-align:right}
+.comp .dt{grid-column:1/-1; font-size:12.5px; color:var(--ink-soft)}
+.meter{grid-column:1/-1; height:5px; border-radius:3px; background:#222b36; overflow:hidden; margin-top:5px}
+.meter i{display:block; height:100%; border-radius:3px}
+.st-ok i{background:var(--green)} .st-warn i{background:var(--amber)} .st-bad i{background:var(--red)}
+.st-none .meter{opacity:.35}
+
+/* ---------- notices ---------- */
+.notice{border-radius:8px; padding:11px 13px; margin:10px 0; font-size:13.5px; border:1px solid}
+.notice b{display:block; font-family:var(--disp); font-size:13px; letter-spacing:.05em; margin-bottom:2px}
+.n-red{background:var(--red-soft); border-color:#5A2C2C; color:#F3C6C6}
+.n-amber{background:var(--amber-soft); border-color:#57451F; color:#F0DBB0}
+.n-green{background:var(--green-soft); border-color:#22513E; color:#B8E6CF}
+.n-blue{background:var(--blue-soft); border-color:#2F4172; color:#C6D5FF}
+
+/* ---------- chips / tables ---------- */
+.chip{display:inline-block; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em;
+  padding:3px 7px; border-radius:5px; background:#222b36; color:var(--ink-soft); text-transform:uppercase}
+.chip.ok{background:var(--green-soft); color:var(--green)}
+.chip.warn{background:var(--amber-soft); color:var(--amber)}
+.chip.bad{background:var(--red-soft); color:var(--red)}
+.chip.key{background:var(--blue-soft); color:var(--blue)}
+th{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--ink-mute); text-align:left; font-weight:400; padding:7px 8px; border-bottom:1px solid var(--line)}
+td{padding:9px 8px; border-bottom:1px solid var(--line); vertical-align:top; font-size:13.5px}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono); font-size:12.5px; white-space:nowrap; color:var(--ink-soft)}
+td.t-timer{cursor:pointer; color:var(--blue); text-decoration:underline dotted}
+.tbl-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+.tbl-scroll table{min-width:520px}
+
+/* ---------- forms ---------- */
+label.fld{display:block; margin:12px 0 0}
+label.fld > .cap{display:block; margin-bottom:5px}
+input,select,textarea{
+  width:100%; background:var(--card-2); border:1px solid var(--line); color:var(--ink);
+  border-radius:8px; padding:10px 11px; font-family:var(--body); font-size:15px;
+}
+textarea{min-height:70px; resize:vertical}
+input[type=range]{padding:0; background:none; border:0}
+.seg{display:flex; flex-wrap:wrap; gap:6px}
+.seg button{
+  background:var(--card-2); border:1px solid var(--line); border-radius:8px;
+  padding:8px 12px; font-size:13.5px; color:var(--ink-soft)
+}
+.seg button.on{background:var(--blue-soft); border-color:var(--blue); color:#DCE6FF}
+.btn{background:var(--blue); border:0; border-radius:8px; color:#0B1220; font-weight:600; padding:12px 16px}
+.btn.ghost{background:none; border:1px solid var(--line); color:var(--ink-soft); font-weight:400; padding:10px 14px}
+.btn.danger{background:none; border:1px solid #5A2C2C; color:var(--red); font-weight:400; padding:10px 14px}
+
+/* ---------- dropzone ---------- */
+.drop{
+  border:1.5px dashed var(--line); border-radius:var(--r); padding:26px 16px; text-align:center;
+  background:var(--card-2); transition:border-color .15s, background .15s
+}
+.drop.over{border-color:var(--blue); background:var(--blue-soft)}
+.drop h4{font-size:16px; margin-bottom:6px}
+
+/* ---------- charts ---------- */
+figure.chart{margin:0}
+figure.chart figcaption{margin-bottom:8px}
+figure.chart h4{font-size:14px}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-soft); margin:6px 0 2px}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:14px; height:3px; border-radius:2px; display:inline-block}
+.chart-svg{width:100%; height:auto; display:block; overflow:visible; touch-action:pan-y}
+.chart-svg text{font-family:var(--mono); font-size:9.5px; fill:var(--ink-mute)}
+.chart-svg .grid{stroke:var(--line); stroke-width:1}
+.chart-svg .axis{stroke:var(--line); stroke-width:1}
+.tip{
+  position:fixed; z-index:60; pointer-events:none; background:#0C1219; border:1px solid var(--line);
+  border-radius:8px; padding:8px 10px; font-size:12px; box-shadow:0 6px 22px rgba(0,0,0,.5); max-width:230px
+}
+.tip b{font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; color:var(--ink-mute); display:block}
+.tip .k{display:flex; gap:8px; align-items:center; margin-top:3px}
+.tip .k i{width:9px; height:9px; border-radius:2px; flex:none}
+
+/* ---------- stat tiles ---------- */
+.stat{background:var(--card-2); border:1px solid var(--line); border-radius:9px; padding:12px}
+.stat b{display:block; font-family:var(--disp); font-size:26px; line-height:1.1}
+.stat .cap{margin-top:4px}
+.stat .sub{font-size:12px; color:var(--ink-soft); margin-top:3px}
+
+/* ---------- log entries ---------- */
+.entry{border:1px solid var(--line); border-radius:9px; padding:11px 12px; margin:9px 0; background:var(--card-2)}
+.entry-top{display:flex; gap:7px; align-items:center; flex-wrap:wrap}
+.entry-top .d{font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-right:2px}
+.note-txt{font-size:13px; color:var(--ink-soft); margin-top:7px; white-space:pre-wrap}
+.entry-actions{display:flex; gap:7px; margin-top:9px; flex-wrap:wrap}
+.entry-actions button{background:none; border:1px solid var(--line); border-radius:7px;
+  color:var(--ink-soft); font-size:12px; padding:5px 9px}
+.entry-actions .flag-on{border-color:#5A2C2C; color:var(--red)}
+.entry-actions .flag-ok{border-color:#22513E; color:var(--green)}
+
+/* ---------- accordion ---------- */
+details.sec{border:1px solid var(--line); border-radius:var(--r); background:var(--card); margin:12px 0; overflow:hidden}
+details.sec > summary{list-style:none; cursor:pointer; padding:14px 16px; display:flex; align-items:center; gap:10px}
+details.sec > summary::-webkit-details-marker{display:none}
+details.sec > summary h3{font-size:15px}
+details.sec > summary .cap{margin-left:auto}
+details.sec > div{padding:0 16px 16px}
+details.sec[open] > summary{border-bottom:1px solid var(--line); margin-bottom:14px}
+
+/* ---------- timer bar ---------- */
+#timerbar{
+  position:fixed; left:0; right:0; bottom:0; display:none; align-items:center; gap:12px;
+  padding:12px 18px; background:var(--blue-soft); border-top:1px solid var(--blue); z-index:50; cursor:pointer
+}
+#timerbar.on{display:flex}
+#timerbar.done{background:var(--green-soft); border-top-color:var(--green)}
+#timerbar b{font-family:var(--mono); font-size:22px}
+#timerbar span{font-size:13px; color:var(--ink-soft)}
+
+.hidden{display:none !important}
+.empty{color:var(--ink-mute); font-size:13.5px; padding:14px 0; text-align:center}
+hr.sep{border:0; border-top:1px solid var(--line); margin:16px 0}
+.foot{font-size:11.5px; color:var(--ink-mute); padding:24px 0 8px; text-align:center}
+
+@media (max-width:520px){
+  .dial{width:92px; height:92px}
+  .dial .val b{font-size:28px}
+  .brand{font-size:22px}
+}

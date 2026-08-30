@@ -711,7 +711,53 @@ function terrainBlock(a, comp) {
       <td class="num">${n1(b.avgTorque)} Nm</td>
       <td class="num">${n1(b.p95Torque)} Nm</td></tr>`).join('')}</tbody>
   </table></div>
-  <p class="small muted" style="margin:8px 0 0">Gradient is taken over rolling 25 m runs of smoothed altitude, so a sustained pitch sitting exactly on a bin edge splits across two rows.</p>`;
+  <p class="small muted" style="margin:8px 0 0">Gradient is taken over rolling 25 m runs of smoothed altitude, so a sustained pitch sitting exactly on a bin edge splits across two rows.</p>
+  ${climbBlock(a)}`;
+}
+
+/** The climbs themselves. Total ascent alone cannot distinguish one sustained
+ *  effort from a long shallow drift, and they are not the same knee exposure. */
+function climbBlock(a) {
+  const climbs = a.climbs;
+  if (!climbs) return '';
+  if (!climbs.length) {
+    return `<hr class="sep"><div class="cap">Climbs</div>
+      <p class="small muted" style="margin:6px 0 0">No sustained climb on this ride. Every rise was shallower than 2% or shorter than 150 m.</p>`;
+  }
+  const gain = climbs.reduce((s, c) => s + c.gainM, 0);
+  const secs = climbs.reduce((s, c) => s + c.secs, 0);
+  const total = a.ascentM ?? a.terrain?.ascentM ?? null;
+  const steepest = climbs.reduce((m, c) => (c.maxGrade > (m?.maxGrade ?? -99) ? c : m), null);
+  const hardest = climbs.reduce((m, c) => ((c.avgTorque ?? 0) > (m?.avgTorque ?? -1) ? c : m), null);
+
+  return `<hr class="sep">
+  <div class="cap">Climbs</div>
+  <div class="grid3" style="margin:8px 0 12px">
+    <div class="stat"><b>${climbs.length}</b><span class="cap">Climbs</span>
+      <div class="sub">${hhmm(secs)} of climbing</div></div>
+    <div class="stat"><b>${Math.round(gain * 3.28084)}</b><span class="cap">ft in climbs</span>
+      ${total ? `<div class="sub">${n0((gain / total) * 100)}% of the ride's ascent</div>` : ''}</div>
+    <div class="stat"><b>${n1(steepest?.maxGrade)}%</b><span class="cap">Steepest pitch</span>
+      <div class="sub">at ${n1(steepest?.startKm)} km</div></div>
+  </div>
+  ${total && gain / total < 0.5 ? `<p class="small muted" style="margin:0 0 10px">Only ${n0((gain / total) * 100)}% of the ascent came from real climbs. The rest accumulated below 2%, which never feels like climbing while riding it.</p>` : ''}
+  <div class="tbl-scroll"><table data-notimer="1">
+    <thead><tr><th>#</th><th>At</th><th>Length</th><th>Gain</th><th>Time</th><th>Avg</th><th>Peak</th><th>Cadence</th><th>Power</th><th>Torque</th></tr></thead>
+    <tbody>${climbs.map((c, i) => `<tr>
+      <td class="num">${i + 1}</td>
+      <td class="num">${n1(c.startKm)} km</td>
+      <td class="num">${c.lenM} m</td>
+      <td class="num">${n1(c.gainM)} m</td>
+      <td class="num">${Math.floor(c.secs / 60)}:${String(c.secs % 60).padStart(2, '0')}</td>
+      <td class="num">${n1(c.avgGrade)}%</td>
+      <td class="num">${n1(c.maxGrade)}%</td>
+      <td class="num"><span class="chip ${c.avgCadence == null ? '' : c.avgCadence >= 80 ? 'ok' : c.avgCadence >= 70 ? 'warn' : 'bad'}">${n0(c.avgCadence)}</span>${c.minCadence != null && c.minCadence < 40 ? `<br><span style="color:var(--amber)">min ${c.minCadence}</span>` : ''}</td>
+      <td class="num">${n0(c.avgPower)} W</td>
+      <td class="num">${n1(c.avgTorque)}<br><span style="color:var(--ink-mute)">pk ${n1(c.peakTorque)}</span></td></tr>`).join('')}</tbody>
+  </table></div>
+  ${hardest?.avgTorque != null ? `<p class="small muted" style="margin:8px 0 0">Hardest on the knee was climb ${climbs.indexOf(hardest) + 1} at ${n1(hardest.startKm)} km: ${n1(hardest.avgTorque)} Nm average, peaking at ${n1(hardest.peakTorque)} Nm.</p>` : ''}
+  ${climbs.some(c => c.minCadence != null && c.minCadence < 40)
+    ? `<p class="small muted" style="margin:6px 0 0">A minimum cadence under 40 rpm inside a climb usually means a stop or a near-stall. Restarting on a gradient asks more of the knee than riding through it does.</p>` : ''}`;
 }
 
 /** Match a ride to R1/R2/R3 by the day it fell on, then by shape. */
@@ -1055,6 +1101,8 @@ function attachTimers(root) {
   if (!root) return;
   root.querySelectorAll('td.num').forEach(td => {
     if (td.dataset.tmr) return;
+    // climb durations are not rest intervals; tapping one should do nothing
+    if (td.closest('[data-notimer]')) return;
     const m = td.textContent.trim().match(/^(\d{1,2}):(\d{2})\b/);
     if (!m || td.textContent.includes('×')) return;
     td.dataset.tmr = '1';

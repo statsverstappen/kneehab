@@ -202,6 +202,7 @@ function fitToActivity(msgs, fileName) {
   if (recs.length > 20) {
     a.detail = summarizeRecords(recs);
     a.terrain = terrainProfile(recs);
+    a.climbs = detectClimbs(recs);
   }
   a.id = activityId(a);
   return a;
@@ -224,23 +225,97 @@ const TORQUE_BUCKET = 2.5, TORQUE_BUCKETS = 20;   // 0 to 50 Nm
  *  Barometric altitude is noisy, so grade is taken over a rolling run of at
  *  least 25 m of travel on a smoothed altitude trace rather than sample to
  *  sample, which would produce nonsense spikes. */
-export function terrainProfile(recs) {
+/** Shared basis for both terrain readouts: the usable records, a smoothed
+ *  altitude trace, and the gradient at each sample. Kept in one place so the
+ *  bin summary and the climb finder can never disagree about the profile. */
+function gradeTrace(recs) {
   const alt0 = r => r.enhanced_altitude ?? r.altitude;
-  const dist0 = r => r.distance ?? (r.enhanced_speed != null ? null : null);
   const pts = recs
-    .filter(r => r.timestamp && alt0(r) != null && dist0(r) != null)
+    .filter(r => r.timestamp && alt0(r) != null && r.distance != null)
     .sort((a, b) => a.timestamp - b.timestamp);
   if (pts.length < 60) return null;
 
-  // centred moving average over the altitude trace
+  // centred moving average: raw barometric altitude is far too noisy to
+  // differentiate sample to sample
   const W = 7;
-  const alt = pts.map(alt0);
-  const smooth = alt.map((_, i) => {
-    const a = Math.max(0, i - W), b = Math.min(alt.length - 1, i + W);
+  const raw = pts.map(alt0);
+  const smooth = raw.map((_, i) => {
+    const a = Math.max(0, i - W), b = Math.min(raw.length - 1, i + W);
     let s = 0;
-    for (let k = a; k <= b; k++) s += alt[k];
+    for (let k = a; k <= b; k++) s += raw[k];
     return s / (b - a + 1);
   });
+
+  // gradient over a rolling run of at least 25 m of travel
+  const grade = new Array(pts.length).fill(null);
+  for (let i = 1; i < pts.length; i++) {
+    let j = i;
+    while (j > 0 && pts[i].distance - pts[j].distance < 25) j--;
+    const run = pts[i].distance - pts[j].distance;
+    if (run < 25) continue;
+    const g = ((smooth[i] - smooth[j]) / run) * 100;
+    if (isFinite(g)) grade[i] = Math.max(-25, Math.min(25, g));
+  }
+  return { pts, smooth, grade };
+}
+
+/* A climb starts at this gradient, ends when it falls below the exit value,
+   and a dip shorter than the bridge distance does not split it in two. */
+export const CLIMB = { enter: 2.0, exit: 0.5, bridgeM: 60, minGainM: 8, minLenM: 150 };
+
+/** Where the climbs actually were, and what each one cost. The bin summary
+ *  says how much time sat at each gradient; this says whether that came from
+ *  one sustained effort or a dozen short kicks, which are different exposures. */
+export function detectClimbs(recs) {
+  const t = gradeTrace(recs);
+  if (!t) return null;
+  const { pts, smooth, grade } = t;
+
+  const spans = [];
+  let cur = null;
+  for (let i = 1; i < pts.length; i++) {
+    const g = grade[i];
+    if (g == null) continue;
+    if (!cur) { if (g >= CLIMB.enter) cur = { start: i, lastAbove: i }; continue; }
+    if (g >= CLIMB.exit) { if (g >= CLIMB.enter) cur.lastAbove = i; }
+    else if (pts[i].distance - pts[cur.lastAbove].distance > CLIMB.bridgeM) { spans.push(cur); cur = null; }
+  }
+  if (cur) spans.push(cur);
+
+  const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const quant = (a, q) => { if (!a.length) return null; const b = a.slice().sort((x, y) => x - y); return b[Math.floor(q * (b.length - 1))]; };
+  const r1 = v => v == null ? null : Math.round(v * 10) / 10;
+
+  return spans.map(c => {
+    const s = c.start, e = c.lastAbove;
+    const lenM = pts[e].distance - pts[s].distance;
+    const gainM = smooth[e] - smooth[s];
+    const slice = pts.slice(s, e + 1);
+    const cad = slice.map(p => p.cadence).filter(x => x != null && x > 0);
+    const pw = slice.map(p => p.power).filter(x => x != null);
+    const tq = slice.map(p => (p.cadence >= 30 ? torqueNm(p.power, p.cadence) : null)).filter(x => x != null);
+    return {
+      startSec: Math.round((pts[s].timestamp - pts[0].timestamp) / 1000),
+      startKm: r1(pts[s].distance / 1000),
+      lenM: Math.round(lenM),
+      gainM: r1(gainM),
+      secs: Math.round((pts[e].timestamp - pts[s].timestamp) / 1000),
+      avgGrade: r1((gainM / lenM) * 100),
+      maxGrade: r1(quant(grade.slice(s, e + 1).filter(x => x != null), 0.95)),
+      avgCadence: r1(mean(cad)),
+      minCadence: cad.length ? Math.min(...cad) : null,
+      avgPower: r1(mean(pw)),
+      avgTorque: r1(mean(tq)),
+      peakTorque: r1(quant(tq, 0.95)),
+      lowCadSec: slice.filter(p => p.cadence > 0 && p.cadence < 70).length
+    };
+  }).filter(c => c.gainM >= CLIMB.minGainM && c.lenM >= CLIMB.minLenM);
+}
+
+export function terrainProfile(recs) {
+  const t = gradeTrace(recs);
+  if (!t) return null;
+  const { pts, smooth, grade: gradeAt } = t;
 
   const bins = GRADE_BINS.map(b => ({
     ...b, sec: 0, powerSec: 0, cadSec: 0, torqueSec: 0, nCad: 0, lowCadSec: 0, torques: []
@@ -255,14 +330,8 @@ export function terrainProfile(recs) {
     const rise = smooth[i] - smooth[i - 1];
     if (rise > 0) ascentM += rise;
 
-    // walk back until we have a run long enough for the grade to mean something
-    let j = i;
-    while (j > 0 && pts[i].distance - pts[j].distance < 25) j--;
-    const run = pts[i].distance - pts[j].distance;
-    if (run < 25) continue;
-    let grade = ((smooth[i] - smooth[j]) / run) * 100;
-    if (!isFinite(grade)) continue;
-    grade = Math.max(-25, Math.min(25, grade));
+    const grade = gradeAt[i];
+    if (grade == null) continue;
     gradeSamples++;
 
     const bin = bins.find(b => grade >= b.lo && grade < b.hi);
@@ -277,11 +346,11 @@ export function terrainProfile(recs) {
     // torque only where the legs are actually turning: a couple of samples at
     // 20 rpm cresting a rise are real but not sustained load, and they
     // otherwise dominate the percentiles
-    const t = (c != null && c >= 30) ? torqueNm(p, c) : null;
-    if (t != null) {
-      bin.torqueSec += t * dt;
-      bin.torques.push(t);
-      const b = Math.min(TORQUE_BUCKETS - 1, Math.floor(t / TORQUE_BUCKET));
+    const nm = (c != null && c >= 30) ? torqueNm(p, c) : null;
+    if (nm != null) {
+      bin.torqueSec += nm * dt;
+      bin.torques.push(nm);
+      const b = Math.min(TORQUE_BUCKETS - 1, Math.floor(nm / TORQUE_BUCKET));
       torqueHist[b] += dt;
     }
   }

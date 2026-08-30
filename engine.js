@@ -119,15 +119,21 @@ export function kneeStatus(sessions, dateStr) {
     .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
   const last = sessions.filter(s => s.date <= dateStr)
     .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)[0] || null;
-  const swell = recent.length ? Math.max(...recent.map(s => s.swell ?? 0)) : null;
-  const swell48 = recent.filter(s => daysBetween(s.date, dateStr) <= 2).map(s => s.swell ?? 0);
+  // An unrated entry (one auto-added from Garmin, pain and swelling not yet
+  // filled in) must not read as a zero. Absent is absent.
+  const graded = recent.filter(s => s.swell != null).map(s => s.swell);
+  const graded48 = recent.filter(s => daysBetween(s.date, dateStr) <= 2 && s.swell != null).map(s => s.swell);
+  const lastRated = sessions.filter(s => s.date <= dateStr && s.pain != null)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)[0] || null;
   return {
     lastSession: last,
-    swellMax3d: swell,
-    swellMax48h: swell48.length ? Math.max(...swell48) : null,
-    lastPain: last ? last.pain : null,
-    flagged: !!(last && last.flag24 === true),
-    daysSinceLast: last ? daysBetween(last.date, dateStr) : null,
+    swellMax3d: graded.length ? Math.max(...graded) : null,
+    swellMax48h: graded48.length ? Math.max(...graded48) : null,
+    lastPain: lastRated ? lastRated.pain : null,
+    lastRated,
+    flagged: recent.some(s => s.flag24 === true),
+    daysSinceLast: lastRated ? daysBetween(lastRated.date, dateStr) : null,
+    unrated: sessions.filter(s => s.date <= dateStr && s.pain == null).length,
     entries: recent.length
   };
 }
@@ -332,7 +338,7 @@ export function computeReadiness(store, dateStr) {
     comps.push({
       key: 'pain', label: 'Pain, last session', max: 12, pts,
       state: knee.lastPain <= 2 ? 'ok' : knee.lastPain <= 4 ? 'warn' : 'bad',
-      detail: `${knee.lastPain}/10 on ${fmtDate(knee.lastSession.date)}${knee.flagged ? ' · 24h flag set' : ''}`
+      detail: `${knee.lastPain}/10 on ${fmtDate(knee.lastRated.date)}${knee.flagged ? ' · 24h flag set' : ''}`
     });
   } else {
     comps.push({

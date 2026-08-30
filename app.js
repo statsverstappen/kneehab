@@ -445,8 +445,11 @@ function painSwellChart() {
 function entryHtml(e) {
   const tCls = e.type === 'A' ? 'key' : e.type === 'B' ? 'key' : e.type === 'PT' ? '' : e.type === 'YBT' ? 'ok' : '';
   const tLbl = P.SESSION_LABELS[e.type] || e.type;
-  const painCls = e.pain <= 2 ? 'ok' : e.pain <= 4 ? 'warn' : 'bad';
+  const rated = e.pain != null;
+  const painCls = !rated ? '' : e.pain <= 2 ? 'ok' : e.pain <= 4 ? 'warn' : 'bad';
   let extra = '';
+  if (e.src === 'garmin') extra += `<span class="chip key">From Garmin</span>`;
+  if (!rated) extra += `<span class="chip warn">Needs pain &amp; swelling</span>`;
   if (e.swell != null) extra += `<span class="chip ${e.swell <= 1 ? 'ok' : e.swell === 2 ? 'warn' : 'bad'}">Swell ${e.swell}${e.swell ? '+' : ''}</span>`;
   if (e.type === 'YBT' && e.ll > 0) {
     const ssd = Math.abs(e.reachL - e.reachR), p = Math.min(e.reachL, e.reachR) / e.ll * 100;
@@ -456,14 +459,37 @@ function entryHtml(e) {
   const flag = e.flag24 === true ? `<button class="flag-on" data-act="flag" data-id="${e.id}">⚠ 24h: swelling/pain</button>`
     : e.flag24 === false ? `<button class="flag-ok" data-act="flag" data-id="${e.id}">✓ 24h: clear</button>`
     : `<button data-act="flag" data-id="${e.id}">24h check · tap tomorrow</button>`;
-  return `<div class="entry">
+  const painOpts = ['<option value="">–</option>']
+    .concat([...Array(11).keys()].map(v => `<option value="${v}"${e.pain === v ? ' selected' : ''}>${v}</option>`)).join('');
+  const swellOpts = ['<option value="">–</option>']
+    .concat([0, 1, 2, 3, 4].map(v => `<option value="${v}"${e.swell === v ? ' selected' : ''}>${v}${v ? '+' : ''}</option>`)).join('');
+
+  return `<div class="entry${rated ? '' : ' unrated'}">
     <div class="entry-top"><span class="d">${E.fmtDate(e.date)}</span>
       <span class="chip ${tCls}">${esc(tLbl)}</span>
       <span class="chip">Phase ${esc(String(e.phase ?? '–'))}</span>
-      <span class="chip ${painCls}">Pain ${e.pain}</span>${extra}</div>
+      ${rated ? `<span class="chip ${painCls}">Pain ${e.pain}</span>` : ''}${extra}</div>
     ${e.notes ? `<div class="note-txt">${esc(e.notes)}</div>` : ''}
+    <div class="entry-edit">
+      <label>Pain <select data-act="edit-pain" data-id="${e.id}">${painOpts}</select></label>
+      <label>Swelling <select data-act="edit-swell" data-id="${e.id}">${swellOpts}</select></label>
+    </div>
     <div class="entry-actions">${flag}<button data-act="del" data-id="${e.id}">Delete</button></div>
   </div>`;
+}
+
+/** Rides Garmin knows about that the knee log has no entry for. Without the
+ *  pain and swelling half, a ride is training data with no outcome attached. */
+function missingRides() {
+  const logged = new Set();
+  for (const s of store.sessions) if (String(s.type)[0] === 'R') logged.add(s.date);
+  const seen = new Set();
+  return store.garmin.activities.filter(a => {
+    if (a.sport !== 'cycling' || (a.durSec || 0) < 1200) return false;
+    if (logged.has(a.date) || seen.has(a.date)) return false;
+    seen.add(a.date);
+    return true;
+  });
 }
 
 /* ============================== GARMIN ============================== */
@@ -491,6 +517,25 @@ function renderGarmin() {
         <div class="sub">${acwr.chronic < 15 ? 'needs ~4 weeks of history' : `${n0(acwr.acute)} vs ${n0(acwr.chronic)} TSS`}</div></div>
     </div>
   </div>`;
+
+  const missing = missingRides();
+  if (missing.length) {
+    html += `<div class="card">
+      <span class="cap">Unlogged rides</span>
+      <p class="small" style="margin:8px 0 0">${missing.length} ride${missing.length === 1 ? '' : 's'} in your Garmin history ${missing.length === 1 ? 'has' : 'have'} no entry in the knee log, so there is no pain or swelling reading attached to ${missing.length === 1 ? 'it' : 'them'}.</p>
+      <div class="tbl-scroll" style="margin-top:8px"><table>
+        <thead><tr><th>Date</th><th>Would log as</th><th>Time</th><th>NP</th><th>Cadence</th></tr></thead>
+        <tbody>${missing.map(a => `<tr>
+          <td class="num">${E.fmtDate(a.date)}</td>
+          <td>${esc(P.SESSION_LABELS[guessRideCode(a)] || 'Ride')}</td>
+          <td class="num">${hhmm(a.durSec)}</td>
+          <td class="num">${n0(a.np ?? a.avgPower)} W</td>
+          <td class="num">${n0(a.avgCadence)} rpm</td></tr>`).join('')}</tbody>
+      </table></div>
+      <div class="row" style="margin-top:12px"><button class="btn" data-act="log-rides">Add ${missing.length} to the log</button></div>
+      <p class="small muted" style="margin:8px 0 0">They go in unrated. Set pain and swelling on each from the Log tab, and change the session type there if I guessed it wrong.</p>
+    </div>`;
+  }
 
   if (acts.length) {
     const series = E.loadSeries(acts, store.settings.ftp, today, 56);
@@ -971,6 +1016,26 @@ function onClick(ev) {
     case 'import': $('#import-file').click(); break;
     case 'pick': $('#garmin-file').click(); break;
     case 'detail': ui.expanded[btn.dataset.id] = !ui.expanded[btn.dataset.id]; render(); break;
+    case 'log-rides': {
+      const missing = missingRides();
+      let i = 0;
+      for (const a of missing) {
+        const bits = [`${Math.round((a.durSec || 0) / 60)} min`];
+        if (a.np ?? a.avgPower) bits.push(`${Math.round(a.np ?? a.avgPower)} W NP`);
+        if (a.avgCadence) bits.push(`${Math.round(a.avgCadence)} rpm`);
+        if (a.leftPct != null) bits.push(`${a.leftPct}% left`);
+        store.sessions.push({
+          id: Date.now() + (i++), date: a.date, type: guessRideCode(a) || 'R1',
+          phase: E.phaseFor(store, a.date).phase,
+          pain: null, swell: null, notes: `Added from Garmin · ${bits.join(' · ')}`,
+          flag24: null, src: 'garmin', garminId: a.id
+        });
+      }
+      saveStore();
+      ui.tab = 'log';
+      render();
+      break;
+    }
     case 'save-settings': {
       store.settings.surgeryDate = $('#set-surgery').value;
       store.settings.startDate = $('#set-start').value;
@@ -1011,6 +1076,22 @@ function onClick(ev) {
 function onChange(ev) {
   const t = ev.target;
   if (t.id === 'log-pain') { $('#pain-val').textContent = t.value; return; }
+
+  if (t.dataset && (t.dataset.act === 'edit-pain' || t.dataset.act === 'edit-swell')) {
+    const s = store.sessions.find(x => x.id === Number(t.dataset.id));
+    if (!s) return;
+    const v = t.value === '' ? null : parseInt(t.value, 10);
+    if (t.dataset.act === 'edit-pain') s.pain = v; else s.swell = v;
+    saveStore();
+    const entry = t.closest('.entry');
+    if (entry) entry.outerHTML = entryHtml(s);          // repaint one row, keep scroll
+    if (v != null && t.dataset.act === 'edit-swell' && v >= 2) {
+      alert(v >= 3
+        ? `Swelling ${v}+ recorded. Per the PT protocol: drop back a phase, ice and elevate${v >= 4 ? ', and contact your surgeon.' : '.'}`
+        : 'Swelling 2+ recorded. Reduce intensity and do not progress this week.');
+    }
+    return;
+  }
   if (t.id === 'import-file' && t.files[0]) {
     const r = new FileReader();
     r.onload = () => importBackup(r.result);

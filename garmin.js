@@ -166,8 +166,11 @@ const SPORT_FROM_TEXT = t => {
 
 /* ========================= normalized records ========================= */
 
+/** Keyed on the start instant, not on duration: a CSV row reports moving time
+ *  while the FIT for the same ride reports elapsed timer time, and keying on
+ *  duration made those look like two different rides. */
 function activityId(a) {
-  return `${a.startISO || a.date}|${a.sport}|${Math.round(a.durSec || 0)}`;
+  return `${a.startISO || a.date}|${a.sport}`;
 }
 
 function fitToActivity(msgs, fileName) {
@@ -442,7 +445,8 @@ const readText = file => file.text();
 export async function ingestFiles(files, { onProgress } = {}) {
   const activities = [], daily = [], warnings = [];
   const queue = [];
-  for (const file of files) queue.push({ name: file.name, file });
+  for (const file of files) queue.push({ name: file.name, file, depth: 0 });
+  let noSession = 0, noWellness = 0;
 
   let done = 0;
   while (queue.length) {
@@ -450,18 +454,25 @@ export async function ingestFiles(files, { onProgress } = {}) {
     const name = item.name.toLowerCase();
     try {
       if (name.endsWith('.zip')) {
+        if (item.depth > 3) { warnings.push(`${item.name}: archive nested too deeply, skipped.`); continue; }
         const buf = item.buffer ?? await readBuf(item.file);
         const entries = await unzip(buf);
         if (!entries.length) warnings.push(`${item.name}: nothing readable inside the archive.`);
         for (const e of entries) {
           const n = e.name.toLowerCase();
-          if (/\.(fit|csv|json)$/.test(n) && !n.includes('__macosx')) queue.push({ name: e.name, buffer: e.buffer });
+          // Garmin's "Export Your Data" bundle puts the activity FITs inside a
+          // second zip, so archives are followed rather than skipped.
+          if (/\.(fit|csv|json|zip)$/.test(n) && !n.includes('__macosx')) {
+            queue.push({ name: e.name, buffer: e.buffer, depth: item.depth + 1 });
+          }
         }
       } else if (name.endsWith('.fit')) {
         const buf = item.buffer ?? await readBuf(item.file);
         const { messages } = decodeFit(buf);
         const a = fitToActivity(messages, item.name);
-        if (a) activities.push(a); else warnings.push(`${item.name}: no session message found.`);
+        // A full export carries hundreds of settings and monitoring FITs with no
+        // session message. Those are not errors and are not worth naming.
+        if (a) activities.push(a); else noSession++;
       } else if (name.endsWith('.csv')) {
         const text = item.buffer ? new TextDecoder().decode(item.buffer) : await readText(item.file);
         const rows = parseCsv(text);
@@ -471,8 +482,10 @@ export async function ingestFiles(files, { onProgress } = {}) {
       } else if (name.endsWith('.json')) {
         const text = item.buffer ? new TextDecoder().decode(item.buffer) : await readText(item.file);
         const rows = parseWellnessJson(text);
+        // an export bundles profile, gear, course and settings JSON alongside
+        // the wellness files; those simply have nothing to contribute
         if (rows.length) daily.push(...rows);
-        else warnings.push(`${item.name}: no daily wellness values recognised.`);
+        else noWellness++;
       } else {
         warnings.push(`${item.name}: unsupported file type, skipped.`);
       }
@@ -482,6 +495,8 @@ export async function ingestFiles(files, { onProgress } = {}) {
     done++;
     onProgress?.(done, done + queue.length);
   }
+  if (noWellness) warnings.push(`${noWellness} JSON file${noWellness === 1 ? '' : 's'} carried no daily wellness values, skipped.`);
+  if (noSession) warnings.push(`${noSession} file${noSession === 1 ? '' : 's'} in the archive held no activity (settings and monitoring records), skipped.`);
   return { activities, daily, warnings };
 }
 

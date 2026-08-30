@@ -4,7 +4,7 @@
 
 import * as P from './protocol.js';
 import * as E from './engine.js';
-import { ingestFiles, mergeActivities, mergeDaily, torqueNm } from './garmin.js';
+import { ingestFiles, mergeActivities, mergeDaily, torqueNm, timeAboveTorque } from './garmin.js';
 
 /* ============================== store ============================== */
 
@@ -148,6 +148,32 @@ function timeChart({ from, to, bars = null, lines = [], refLines = [], yLabel = 
     ${xl}
     <line class="cross" x1="0" y1="${pt}" x2="0" y2="${h - pb}" stroke="var(--ink-mute)" stroke-width="1" opacity="0"/>
   </svg>`;
+}
+
+/** Horizontal bars over a categorical axis (gradient bands), one series,
+ *  with an optional reference line. Values are labelled directly, so there is
+ *  nothing to look up in a legend. */
+function binChart({ bins, refLine = null, unit = '', fmt = n1 }) {
+  const rows = bins.filter(b => b.value != null);
+  if (!rows.length) return '<p class="empty">No data in this ride.</p>';
+  const w = chartDims().w, rowH = 26, padL = 62, padR = 46, padT = refLine ? 16 : 6;
+  const h = padT + rows.length * rowH + 16;
+  const max = Math.max(...rows.map(r => r.value), refLine?.value ?? 0) * 1.12 || 1;
+  const xOf = v => padL + (v / max) * (w - padL - padR);
+
+  let out = '';
+  rows.forEach((r, i) => {
+    const y = padT + i * rowH;
+    out += `<text x="${padL - 8}" y="${y + rowH / 2 + 3}" text-anchor="end">${esc(r.label)}</text>`
+         + `<rect x="${padL}" y="${y + 5}" width="${Math.max(1, xOf(r.value) - padL).toFixed(1)}" height="${rowH - 12}" rx="3" fill="var(--s1)"/>`
+         + `<text x="${(xOf(r.value) + 6).toFixed(1)}" y="${y + rowH / 2 + 3}" fill="var(--ink-soft)">${fmt(r.value)}${esc(unit)}${r.sub ? ` <tspan fill="var(--ink-mute)">${esc(r.sub)}</tspan>` : ''}</text>`;
+  });
+  if (refLine) {
+    const x = xOf(refLine.value);
+    out += `<line x1="${x.toFixed(1)}" y1="${padT - 4}" x2="${x.toFixed(1)}" y2="${padT + rows.length * rowH}" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="3 3"/>`
+         + `<text x="${x.toFixed(1)}" y="${padT - 7}" text-anchor="middle" fill="var(--amber)">${esc(refLine.label)}</text>`;
+  }
+  return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" role="img">${out}</svg>`;
 }
 
 function dial(score, band) {
@@ -629,8 +655,58 @@ function activityDetail(a) {
   if (d?.p95Torque != null) bits.push(`Peak sustained torque ${n1(d.p95Torque)} Nm (95th percentile)`);
   if (a.gctBalanceLeftPct != null) bits.push(`Ground contact balance ${n1(a.gctBalanceLeftPct)}% left`);
   if (bits.length) html += `<p class="small muted" style="margin:8px 0 0">${bits.map(esc).join(' · ')}</p>`;
+  html += terrainBlock(a, comp);
   if (!html) html = '<p class="small muted">No detailed metrics in this file.</p>';
   return html;
+}
+
+/** What the legs did at each gradient. Only a FIT file carries the per-second
+ *  altitude this needs; a CSV row knows the ride climbed 1,000 ft and nothing
+ *  about where or how steeply. */
+function terrainBlock(a, comp) {
+  const t = a.terrain;
+  if (!t) {
+    return a.source === 'csv'
+      ? `<hr class="sep"><p class="small muted">Terrain: ${a.distKm ? '' : ''}only the ride total is in a CSV export. Drop the .fit file for this ride to get gradient detail.</p>`
+      : '';
+  }
+  const prescribed = comp?.targetTorque ?? null;
+  const climbing = t.bins.filter(b => b.key !== 'desc' && b.key !== 'flat');
+  const climbSec = climbing.reduce((s, b) => s + b.sec, 0);
+  const lowCadSec = t.bins.reduce((s, b) => s + b.lowCadSec, 0);
+  const overSec = prescribed ? timeAboveTorque(t, prescribed * 1.25) : null;
+
+  return `<hr class="sep">
+  <div class="cap">Terrain</div>
+  <div class="grid3" style="margin:8px 0 12px">
+    <div class="stat"><b>${Math.round((a.ascentM ?? t.ascentM) * 3.28084)}</b><span class="cap">ft climbed</span></div>
+    <div class="stat"><b>${hhmm(climbSec)}</b><span class="cap">above 1%</span>
+      <div class="sub">${n0((climbSec / t.movingSec) * 100)}% of the ride</div></div>
+    <div class="stat"><b>${hhmm(lowCadSec)}</b><span class="cap">below 70 rpm</span>
+      <div class="sub">${n0((lowCadSec / t.movingSec) * 100)}% of the ride</div></div>
+  </div>
+  ${overSec != null ? `<div class="notice n-${overSec > 300 ? 'amber' : 'green'}">
+      <b>Crank torque</b>${hhmm(overSec)} spent more than 25% above the ${n1(prescribed)} Nm this session prescribes.</div>` : ''}
+  <figure class="chart" style="margin-top:10px">
+    <figcaption><h4 style="font-size:13px">Mean crank torque by gradient</h4></figcaption>
+    ${binChart({
+      bins: t.bins.map(b => ({ label: b.label, value: b.avgTorque, sub: b.sec ? `· ${Math.round(b.sec / 60)} min` : '' })),
+      refLine: prescribed ? { value: prescribed, label: 'prescribed' } : null,
+      unit: ' Nm'
+    })}
+  </figure>
+  <div class="tbl-scroll" style="margin-top:10px"><table>
+    <thead><tr><th>Gradient</th><th>Time</th><th>Share</th><th>Cadence</th><th>Power</th><th>Torque</th><th>Peak</th></tr></thead>
+    <tbody>${t.bins.filter(b => b.sec).map(b => `<tr>
+      <td>${esc(b.label)}</td>
+      <td class="num">${hhmm(b.sec)}</td>
+      <td class="num">${n0(b.pct)}%</td>
+      <td class="num"><span class="chip ${b.avgCadence == null ? '' : b.avgCadence >= 85 ? 'ok' : b.avgCadence >= 70 ? 'warn' : 'bad'}">${n0(b.avgCadence)} rpm</span></td>
+      <td class="num">${n0(b.avgPower)} W</td>
+      <td class="num">${n1(b.avgTorque)} Nm</td>
+      <td class="num">${n1(b.p95Torque)} Nm</td></tr>`).join('')}</tbody>
+  </table></div>
+  <p class="small muted" style="margin:8px 0 0">Gradient is taken over rolling 25 m runs of smoothed altitude, so a sustained pitch sitting exactly on a bin edge splits across two rows.</p>`;
 }
 
 /** Match a ride to R1/R2/R3 by the day it fell on, then by shape. */

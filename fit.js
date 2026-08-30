@@ -96,6 +96,8 @@ const PROFILE = {
       45: f('left_pedal_smoothness', 2), 46: f('right_pedal_smoothness', 2),
       47: f('combined_pedal_smoothness', 2),
       53: f('fractional_cadence', 128), 73: f('enhanced_speed', 1000),
+      // modern Garmin devices write the enhanced variants and leave 2/6 empty
+      78: f('enhanced_altitude', 5, -500),
       84: f('stance_time_balance', 100), 85: f('step_length', 10)
     }
   }

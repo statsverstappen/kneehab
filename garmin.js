@@ -193,11 +193,128 @@ function fitToActivity(msgs, fileName) {
     stanceMs: s.avg_stance_time ?? null, vertOsc: s.avg_vertical_oscillation ?? null,
     stepLenMm: s.avg_step_length ?? null,
     calories: s.total_calories ?? null, rpe: s.workout_rpe ?? null,
+    ascentM: s.total_ascent ?? null,
     steps: null
   };
-  if (recs.length > 20) a.detail = summarizeRecords(recs);
+  if (recs.length > 20) {
+    a.detail = summarizeRecords(recs);
+    a.terrain = terrainProfile(recs);
+  }
   a.id = activityId(a);
   return a;
+}
+
+/* ------------------------------ terrain ------------------------------ */
+
+export const GRADE_BINS = [
+  { key: 'desc', label: 'Descent', lo: -Infinity, hi: -2 },
+  { key: 'flat', label: 'Flat', lo: -2, hi: 1 },
+  { key: 'g13', label: '1–3%', lo: 1, hi: 3 },
+  { key: 'g35', label: '3–5%', lo: 3, hi: 5 },
+  { key: 'g58', label: '5–8%', lo: 5, hi: 8 },
+  { key: 'g8', label: '8%+', lo: 8, hi: Infinity }
+];
+
+const TORQUE_BUCKET = 2.5, TORQUE_BUCKETS = 20;   // 0 to 50 Nm
+
+/** Gradient, second by second, and what the legs were doing at each of them.
+ *  Barometric altitude is noisy, so grade is taken over a rolling run of at
+ *  least 25 m of travel on a smoothed altitude trace rather than sample to
+ *  sample, which would produce nonsense spikes. */
+export function terrainProfile(recs) {
+  const alt0 = r => r.enhanced_altitude ?? r.altitude;
+  const dist0 = r => r.distance ?? (r.enhanced_speed != null ? null : null);
+  const pts = recs
+    .filter(r => r.timestamp && alt0(r) != null && dist0(r) != null)
+    .sort((a, b) => a.timestamp - b.timestamp);
+  if (pts.length < 60) return null;
+
+  // centred moving average over the altitude trace
+  const W = 7;
+  const alt = pts.map(alt0);
+  const smooth = alt.map((_, i) => {
+    const a = Math.max(0, i - W), b = Math.min(alt.length - 1, i + W);
+    let s = 0;
+    for (let k = a; k <= b; k++) s += alt[k];
+    return s / (b - a + 1);
+  });
+
+  const bins = GRADE_BINS.map(b => ({
+    ...b, sec: 0, powerSec: 0, cadSec: 0, torqueSec: 0, nCad: 0, lowCadSec: 0, torques: []
+  }));
+  const torqueHist = new Array(TORQUE_BUCKETS).fill(0);
+  let ascentM = 0, movingSec = 0, gradeSamples = 0;
+
+  for (let i = 1; i < pts.length; i++) {
+    const dt = Math.min(5, (pts[i].timestamp - pts[i - 1].timestamp) / 1000);
+    if (dt <= 0) continue;
+    movingSec += dt;
+    const rise = smooth[i] - smooth[i - 1];
+    if (rise > 0) ascentM += rise;
+
+    // walk back until we have a run long enough for the grade to mean something
+    let j = i;
+    while (j > 0 && pts[i].distance - pts[j].distance < 25) j--;
+    const run = pts[i].distance - pts[j].distance;
+    if (run < 25) continue;
+    let grade = ((smooth[i] - smooth[j]) / run) * 100;
+    if (!isFinite(grade)) continue;
+    grade = Math.max(-25, Math.min(25, grade));
+    gradeSamples++;
+
+    const bin = bins.find(b => grade >= b.lo && grade < b.hi);
+    if (!bin) continue;
+    bin.sec += dt;
+    const p = pts[i].power, c = pts[i].cadence;
+    if (p != null) bin.powerSec += p * dt;
+    if (c != null && c > 0) {
+      bin.cadSec += c * dt; bin.nCad += dt;
+      if (c < 70) bin.lowCadSec += dt;
+    }
+    // torque only where the legs are actually turning: a couple of samples at
+    // 20 rpm cresting a rise are real but not sustained load, and they
+    // otherwise dominate the percentiles
+    const t = (c != null && c >= 30) ? torqueNm(p, c) : null;
+    if (t != null) {
+      bin.torqueSec += t * dt;
+      bin.torques.push(t);
+      const b = Math.min(TORQUE_BUCKETS - 1, Math.floor(t / TORQUE_BUCKET));
+      torqueHist[b] += dt;
+    }
+  }
+
+  const total = bins.reduce((s, b) => s + b.sec, 0);
+  if (!total) return null;
+
+  return {
+    movingSec, ascentM, gradeSamples,
+    torqueHist, torqueBucket: TORQUE_BUCKET,
+    bins: bins.map(b => {
+      const sorted = b.torques.sort((x, y) => x - y);
+      return {
+        key: b.key, label: b.label, sec: Math.round(b.sec),
+        pct: (b.sec / total) * 100,
+        avgPower: b.sec ? b.powerSec / b.sec : null,
+        avgCadence: b.nCad ? b.cadSec / b.nCad : null,
+        avgTorque: b.sec && b.torqueSec ? b.torqueSec / b.sec : null,
+        p95Torque: sorted.length ? sorted[Math.floor(0.95 * (sorted.length - 1))] : null,
+        lowCadSec: Math.round(b.lowCadSec)
+      };
+    })
+  };
+}
+
+/** Seconds spent above a torque threshold, interpolated inside the bucket. */
+export function timeAboveTorque(terrain, nm) {
+  if (!terrain?.torqueHist) return null;
+  const w = terrain.torqueBucket;
+  let sec = 0;
+  terrain.torqueHist.forEach((s, i) => {
+    const lo = i * w, hi = lo + w;
+    if (nm <= lo) sec += s;
+    else if (nm < hi) sec += s * ((hi - nm) / w);
+  });
+  return sec;
 }
 
 /** Per-second analysis: how much of the ride sat at knee-unfriendly torque,

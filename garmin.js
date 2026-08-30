@@ -518,6 +518,25 @@ export function mergeActivities(existing, incoming) {
 }
 const strip = o => Object.fromEntries(Object.entries(o).filter(([, v]) => v != null));
 
+/** Recompute every stored activity's id under the current scheme and fold
+ *  duplicates together. Activities saved before the key changed still carry
+ *  the old duration-based id, so an import of the same ride would not match
+ *  them and the list would double. Safe to run on every load. */
+export function reindexActivities(list) {
+  const byId = new Map();
+  for (const a of list) {
+    const id = activityId(a);
+    const cur = byId.get(id);
+    if (!cur) { byId.set(id, { ...a, id }); continue; }
+    const merged = (a.source === 'fit' && cur.source !== 'fit')
+      ? { ...cur, ...strip(a) }      // the FIT is the better record
+      : { ...a, ...strip(cur) };
+    merged.id = id;
+    byId.set(id, merged);
+  }
+  return [...byId.values()].sort((x, y) => (x.startISO || '').localeCompare(y.startISO || ''));
+}
+
 export function mergeDaily(existing, incoming) {
   const byDate = new Map(existing.map(d => [d.date, d]));
   let added = 0, updated = 0;

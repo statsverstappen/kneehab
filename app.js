@@ -4,7 +4,7 @@
 
 import * as P from './protocol.js';
 import * as E from './engine.js';
-import { ingestFiles, mergeActivities, mergeDaily, torqueNm, timeAboveTorque } from './garmin.js';
+import { ingestFiles, mergeActivities, mergeDaily, torqueNm, timeAboveTorque, reindexActivities } from './garmin.js';
 
 /* ============================== store ============================== */
 
@@ -31,6 +31,11 @@ function loadStore() {
     store = { ...DEFAULT_STORE(), ...s };
     store.garmin = { activities: [], daily: [], ...(s.garmin || {}) };
     store.settings = { ...DEFAULT_STORE().settings, ...(s.settings || {}) };
+    // fold together anything saved under an older activity key, and persist
+    // the rewritten ids so the next import matches against them
+    const before = store.garmin.activities.map(a => a.id).join('|');
+    store.garmin.activities = reindexActivities(store.garmin.activities);
+    if (store.garmin.activities.map(a => a.id).join('|') !== before) saveStore();
     return;
   }
   store = DEFAULT_STORE();

@@ -395,7 +395,8 @@ function summarizeRecords(recs) {
   const torques = [], cadences = [], balances = [];
   let lowCad = 0, n = 0;
   for (const r of recs) {
-    if (r.cadence != null) { cadences.push(r.cadence); if (r.cadence > 0 && r.cadence < 70) lowCad++; }
+    // coasting zeros are excluded so the mean matches Garmin's moving average
+    if (r.cadence != null && r.cadence > 0) { cadences.push(r.cadence); if (r.cadence < 70) lowCad++; }
     if (r.power != null && r.cadence) {
       const t = torqueNm(r.power, r.cadence);
       if (t != null) torques.push(t);

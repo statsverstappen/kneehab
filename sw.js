@@ -2,7 +2,7 @@
    Cache-first for the app shell so a session works with no signal at the gym,
    with a background refresh so a deploy is picked up on the next load. */
 
-const CACHE = 'kneehab-v2-1';
+const CACHE = 'kneehab-v2-2';
 const ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const ASSETS = [
   './engine.js',
   './garmin.js',
   './fit.js',
+  './sync.js',
   './manifest.json',
   './icon-192.png',
   './icon-180.png'

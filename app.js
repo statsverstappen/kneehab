@@ -5,6 +5,7 @@
 import * as P from './protocol.js';
 import * as E from './engine.js';
 import { ingestFiles, mergeActivities, mergeDaily, torqueNm, timeAboveTorque, reindexActivities } from './garmin.js';
+import { pullRemote, lastSync } from './sync.js';
 
 /* ============================== store ============================== */
 
@@ -22,7 +23,7 @@ const DEFAULT_STORE = () => ({
 });
 
 let store = DEFAULT_STORE();
-let ui = { tab: 'today', logType: 'A', logSwell: '0', viewDay: null, expanded: {} };
+let ui = { tab: 'today', logType: 'A', logSwell: '0', viewDay: null, expanded: {}, ql: { type: null, swell: '0', pain: '0', flag: false } };
 
 function loadStore() {
   let s = null;
@@ -272,38 +273,125 @@ function renderToday() {
     }).join('')}
   </div>`;
 
-  /* today's session */
+  /* quick log: the two numbers the protocol actually runs on */
+  html += quickLogCard(code, plan);
+
+  /* today's session, drills folded away */
   html += `<div class="card">
     <span class="cap">Today's session</span>
     <h3 style="margin-top:4px">${esc(plan.entry?.tag || 'Rest')}</h3>
     <p class="small muted" style="margin:6px 0 0">${esc(plan.entry?.sub || '')}</p>
     ${plan.note ? `<p class="small" style="color:${/✓/.test(plan.note) ? 'var(--green)' : 'var(--amber)'};margin:8px 0 0">${esc(plan.note)}</p>` : ''}
     ${adapt.length ? `<div class="notice n-${r.band}"><b>Adapted for ${r.bandLabel.toLowerCase()}</b><ul style="margin:6px 0 0;padding-left:18px">${adapt.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>` : ''}
-    ${code ? sessionDetail(code, ph.phase) : ''}
-    <div class="row" style="margin-top:14px">
-      <button class="btn" data-act="go-log">Log this session</button>
-      ${code && P.RIDE_CODES.includes(code) ? `<button class="btn ghost" data-act="go-garmin">Import the ride</button>` : ''}
+    ${code ? `<details class="fold"><summary>Session detail</summary>${sessionDetail(code, ph.phase)}</details>` : ''}
+  </div>`;
+
+  /* everything else behind one fold */
+  html += `<details class="fold card-fold"><summary class="card-summary">Score breakdown and impact gates</summary>
+    <div class="card">
+      <span class="cap">What went into the score</span>
+      <div style="margin-top:8px">${r.components.map(c => {
+        const p = c.pts == null ? 0 : (c.pts / c.max) * 100;
+        return `<div class="comp st-${stateClass(c.state) || 'none'}">
+          <div class="nm">${esc(c.label)}</div>
+          <div class="sc">${c.pts == null ? 'no data' : `${Math.round(c.pts)}/${c.max}`}</div>
+          <div class="meter"><i style="width:${p.toFixed(0)}%"></i></div>
+          <div class="dt">${esc(c.detail)}</div>
+        </div>`;
+      }).join('')}</div>
+      <p class="small muted" style="margin:12px 0 0">Garmin data can only lower this score. Swelling and the 24-hour flag override it outright.</p>
+    </div>
+    ${gateBoard(gates)}
+  </details>`;
+  return html;
+}
+
+/** The fast path. Type defaults to today's planned session; "Check-in" is a
+    grade with no session attached, for mornings and rest days. */
+function quickLogCard(code, plan) {
+  const today = E.todayISO();
+  if (ui.ql.type == null) {
+    // today's own slot first, then whatever the planner is carrying over, else a bare check-in
+    const slot = P.WEEK_PLAN.find(p => p.dow === E.dowOf(today))?.code || null;
+    ui.ql.type = (slot && !plan.logged[slot]) ? slot : (code && !plan.logged[code]) ? code : 'CHK';
+  }
+  const last = store.sessions.filter(s => s.date < today).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)[0] || null;
+  const types = [['CHK', 'Check-in'], ['A', 'Climb A'], ['B', 'Climb B'], ['R1', 'R1'], ['R2', 'R2'], ['R3', 'R3'], ['PT', 'PT'], ['WJ', 'Walk–jog']];
+  return `<div class="card ql">
+    <span class="cap">Quick log · ${E.fmtDate(today)}</span>
+    <div class="seg ql-seg" data-ql="type" style="margin-top:8px">
+      ${types.map(([v, l]) => `<button data-v="${v}"${ui.ql.type === v ? ' class="on"' : ''}>${esc(l)}</button>`).join('')}
+    </div>
+    <div class="ql-row"><span class="cap">Swelling</span>
+      <div class="seg ql-seg" data-ql="swell">${['0', '1', '2', '3', '4'].map(v => `<button data-v="${v}"${ui.ql.swell === v ? ' class="on"' : ''}>${v}${v === '0' ? '' : '+'}</button>`).join('')}</div></div>
+    <div class="ql-row"><span class="cap">Pain</span>
+      <div class="seg ql-seg tight" data-ql="pain">${[...Array(11).keys()].map(v => `<button data-v="${v}"${ui.ql.pain === String(v) ? ' class="on"' : ''}>${v}</button>`).join('')}</div></div>
+    ${last ? `<label class="ql-flag"><input type="checkbox" id="ql-flag"${ui.ql.flag ? ' checked' : ''}> 24h flag on ${esc(P.SESSION_LABELS[last.type] || last.type)} ${E.fmtDate(last.date)} (swelling or pain this morning)</label>` : ''}
+    <div class="row" style="margin-top:12px">
+      <button class="btn" data-act="ql-save">Save</button>
+      <button class="btn ghost" data-act="go-log">Full entry</button>
+      ${code && P.RIDE_CODES.includes(code) ? `<button class="btn ghost" data-act="go-garmin">Import ride</button>` : ''}
     </div>
   </div>`;
+}
 
-  /* readiness detail */
-  html += `<div class="card">
-    <span class="cap">What went into the score</span>
-    <div style="margin-top:8px">${r.components.map(c => {
-      const p = c.pts == null ? 0 : (c.pts / c.max) * 100;
-      return `<div class="comp st-${stateClass(c.state) || 'none'}">
-        <div class="nm">${esc(c.label)}</div>
-        <div class="sc">${c.pts == null ? 'no data' : `${Math.round(c.pts)}/${c.max}`}</div>
-        <div class="meter"><i style="width:${p.toFixed(0)}%"></i></div>
-        <div class="dt">${esc(c.detail)}</div>
-      </div>`;
-    }).join('')}</div>
-    <p class="small muted" style="margin:12px 0 0">Garmin data can only lower this score. Swelling and the 24-hour flag override it outright.</p>
-  </div>`;
+/** Shared by the quick-log card and the ?s=&p= URL entry point. */
+function addQuickEntry({ type = 'CHK', swell = null, pain = null, flag = false, date = null, notes = '', rpe = null }) {
+  const d = date || E.todayISO();
+  const msgs = [];
+  if (flag) {
+    const last = store.sessions.filter(s => s.date < d).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)[0];
+    if (last) { last.flag24 = true; msgs.push(`24-hour flag set on ${P.SESSION_LABELS[last.type] || last.type} ${E.fmtDate(last.date)}. Repeat the previous week, do not progress.`); }
+  }
+  // a check-in with nothing graded and no flag is a no-op
+  if (type === 'CHK' && swell == null && pain == null && !notes) { saveStore(); return msgs; }
+  // if today's session of that type is already logged but ungraded (Garmin-added), grade it
+  const existing = type !== 'CHK' ? store.sessions.find(s => s.date === d && s.type === type) : null;
+  if (existing) {
+    if (swell != null) existing.swell = swell;
+    if (pain != null) existing.pain = pain;
+    if (rpe != null) existing.rpe = rpe;
+    if (notes) existing.notes = existing.notes ? `${existing.notes} · ${notes}` : notes;
+    msgs.push(`Updated ${P.SESSION_LABELS[type] || type} for ${E.fmtDate(d)}.`);
+  } else {
+    store.sessions.push({
+      id: Date.now(), date: d, type, phase: E.phaseFor(store, d).phase,
+      pain, swell, rpe, notes, flag24: null, src: 'quick'
+    });
+    msgs.push(`${type === 'CHK' ? 'Check-in' : (P.SESSION_LABELS[type] || type)} saved for ${E.fmtDate(d)}.`);
+  }
+  if (swell != null && swell >= 3) msgs.push(`Swelling ${swell}+. Drop back a phase, ice and elevate${swell >= 4 ? ', and contact your surgeon' : ''}.`);
+  else if (swell === 2) msgs.push('Swelling 2+. No progression this week.');
+  saveStore();
+  return msgs;
+}
 
-  /* gate board */
-  html += gateBoard(gates);
-  return html;
+/** ?s=1&p=2&t=R3&f=1&d=2026-09-12&rpe=6&n=notes  → log and strip the query.
+    Built for a home-screen Shortcut: two questions, one URL, done. */
+function quickLogFromUrl() {
+  const q = new URLSearchParams(location.search);
+  if (!q.has('s') && !q.has('p') && !q.has('f') && !q.has('t')) return null;
+  const int = k => q.has(k) && q.get(k) !== '' ? parseInt(q.get(k), 10) : null;
+  const opts = {
+    type: (q.get('t') || 'CHK').toUpperCase(), swell: int('s'), pain: int('p'), rpe: int('rpe'),
+    flag: q.get('f') === '1', date: /^\d{4}-\d{2}-\d{2}$/.test(q.get('d') || '') ? q.get('d') : null,
+    notes: (q.get('n') || '').trim()
+  };
+  if (opts.swell != null && !(opts.swell >= 0 && opts.swell <= 4)) opts.swell = null;
+  if (opts.pain != null && !(opts.pain >= 0 && opts.pain <= 10)) opts.pain = null;
+  const msgs = addQuickEntry(opts);
+  history.replaceState(null, '', location.pathname);
+  return msgs;
+}
+
+function toast(lines) {
+  if (!lines || !lines.length) return;
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }
+  el.innerHTML = lines.map(esc).join('<br>');
+  el.classList.add('on');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('on'), 4200);
 }
 
 function gateBoard(gates) {
@@ -916,6 +1004,15 @@ function renderSettings() {
   </div>
 
   <div class="card">
+    <span class="cap">Sync</span>
+    ${(() => { const ls = lastSync(); return `<p class="small muted" style="margin:8px 0 12px">The app pulls <code>data/store.json</code> from the repo on every open and merges it in, so entries and rides committed there reach every device. ${ls?.at ? `Last pull ${new Date(ls.at).toLocaleString()}${ls.remoteAt ? `, repo copy from ${new Date(ls.remoteAt).toLocaleDateString()}` : ''}.` : 'Not pulled yet.'}</p>`; })()}
+    <div class="row"><button class="btn ghost" data-act="sync-now">Sync now</button></div>
+    <hr class="sep">
+    <span class="cap">Quick log by URL</span>
+    <p class="small muted" style="margin:8px 0 0">Open the app with <code>?s=&lt;swelling&gt;&amp;p=&lt;pain&gt;</code> and it logs a check-in and clears the query. Add <code>t=R3</code> (or A, B, R1, R2, PT, WJ) to attach it to a session, <code>f=1</code> to set the 24-hour flag on the last session, <code>d=YYYY-MM-DD</code> to backdate. An iOS Shortcut that asks two questions and opens that URL is the two-tap version; recipe in <code>docs/quick-log.md</code>.</p>
+  </div>
+
+  <div class="card">
     <span class="cap">Data</span>
     <p class="small muted" style="margin:8px 0 12px">Everything lives in this browser's storage. Safari can clear site data after long inactivity, so export a backup now and then.</p>
     <div class="row">
@@ -1131,6 +1228,12 @@ function onClick(ev) {
     btn.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
     return;
   }
+  const qlSeg = btn.closest('.ql-seg');
+  if (qlSeg) {
+    ui.ql[qlSeg.dataset.ql] = btn.dataset.v;
+    qlSeg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
+    return;
+  }
   if (btn.closest('#side-btns')) {
     store.settings.operatedSide = btn.dataset.v;
     btn.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn));
@@ -1141,6 +1244,23 @@ function onClick(ev) {
     case 'go-log': ui.tab = 'log'; render(); break;
     case 'go-garmin': ui.tab = 'garmin'; render(); break;
     case 'save-session': saveSession(); break;
+    case 'ql-save': {
+      const msgs = addQuickEntry({
+        type: ui.ql.type || 'CHK', swell: parseInt(ui.ql.swell, 10), pain: parseInt(ui.ql.pain, 10),
+        flag: !!document.getElementById('ql-flag')?.checked
+      });
+      ui.ql = { type: null, swell: '0', pain: '0', flag: false };
+      render(); toast(msgs);
+      break;
+    }
+    case 'sync-now': {
+      btn.disabled = true; btn.textContent = 'Syncing…';
+      pullRemote(store).then(out => {
+        saveStore(); render();
+        toast([out ? `Synced: ${out.sessions} sessions, ${out.activities} rides, ${out.daily} wellness days added${out.updated ? `, ${out.updated} updated` : ''}.` : 'Could not reach the repo copy. Offline, or no data/store.json published yet.']);
+      });
+      break;
+    }
     case 'export': case 'export-all': exportAll(); break;
     case 'import': $('#import-file').click(); break;
     case 'pick': $('#garmin-file').click(); break;
@@ -1168,7 +1288,9 @@ function onClick(ev) {
     case 'save-settings': {
       store.settings.surgeryDate = $('#set-surgery').value;
       store.settings.startDate = $('#set-start').value;
-      store.settings.ftp = parseInt($('#set-ftp').value, 10) || P.FTP_DEFAULT;
+      const newFtp = parseInt($('#set-ftp').value, 10) || P.FTP_DEFAULT;
+      if (newFtp !== store.settings.ftp) store.settings.ftpSource = 'manual';
+      store.settings.ftp = newFtp;
       saveStore(); render();
       break;
     }
@@ -1247,6 +1369,7 @@ function initDrop() {
 }
 
 loadStore();
+const urlMsgs = quickLogFromUrl();
 document.addEventListener('click', onClick);
 document.addEventListener('input', onChange);
 document.addEventListener('change', onChange);
@@ -1266,6 +1389,14 @@ window.addEventListener('resize', () => {
 });
 
 render();
+if (urlMsgs) toast(urlMsgs);
+
+// repo-backed sync: merge the published copy, repaint if anything arrived
+pullRemote(store).then(out => {
+  if (!out) return;
+  const n = out.sessions + out.activities + out.daily + out.settings + out.updated;
+  if (n) { saveStore(); render(); }
+});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));

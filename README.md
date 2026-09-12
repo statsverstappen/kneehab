@@ -13,7 +13,10 @@ Post-meniscectomy return-to-climb and ride protocol, rebuilt around a Garmin-dri
 | `garmin.js` | FIT, CSV, JSON and ZIP ingest, normalization, merge |
 | `fit.js` | Dependency-free FIT binary decoder |
 | `protocol.js` | All training content as data |
+| `sync.js` | Pulls `data/store.json` from the repo on every open and merges it into local storage |
 | `sw.js` | Offline cache |
+| `data/store.json` | The shared copy of the log and ride history, same shape as an export. Commit to it to reach every device |
+| `docs/quick-log.md` | The two-tap logging paths, including the URL parameters and an iOS Shortcut recipe |
 | `tools/make_fit.py` | Builds a synthetic FIT ride for testing |
 | `tools/verify.py` | Headless Playwright checks |
 
@@ -25,6 +28,14 @@ Drop these files into the repo root, replacing `index.html`. Two things to know:
 
 1. The old service worker will still be registered in any browser that has visited the site. It caches the old single-file `index.html`, so the first load after deploying may still show v1. A second load picks up the new worker, which uses a new cache name and claims clients immediately. A hard reload forces it.
 2. Nothing is lost. On first run v2 reads the old `sbkr_log_v1` and `sbkr_start_v1` keys and migrates them into `kneehab_v2`. The old keys are left in place as a fallback.
+
+## Logging without the form (v2.2)
+
+The Today tab now opens with a quick log: session type preselected to today's slot, swelling and pain as tap rows, one checkbox for the 24-hour flag. The same entry can be made from a URL, `?s=1&p=2`, which is what a home-screen Shortcut opens. See `docs/quick-log.md`. Drills, the score breakdown and the gate board are folded away on Today and open with a tap.
+
+## Keeping devices in step
+
+Browser storage does not sync between the Mac and the phone. The app now ships `data/store.json` and merges it on every open: entries and rides in that file appear on every device, nothing local is removed, and repo settings only fill blanks. To publish new entries, export from the device that has them and commit the file as `data/store.json`. Settings has a "Sync now" button.
 
 ## Getting Garmin data in
 

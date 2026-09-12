@@ -17,7 +17,7 @@ export const WEEK_PLAN = [
 export const DAY_NAMES = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 0: 'Sun' };
 
 export const SESSION_LABELS = {
-  A: 'Climb A', B: 'Climb B', R1: 'Ride 1', R2: 'Ride 2', R3: 'Ride 3', PT: 'PT', YBT: 'YBT-A', WJ: 'Walk–jog'
+  A: 'Climb A', B: 'Climb B', R1: 'Ride 1', R2: 'Ride 2', R3: 'Ride 3', PT: 'PT', YBT: 'YBT-A', WJ: 'Walk–jog', CHK: 'Check-in'
 };
 
 /* ---------- climbing phases ---------- */

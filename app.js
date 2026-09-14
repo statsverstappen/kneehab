@@ -1046,7 +1046,14 @@ function renderSettings() {
 
 /* ============================== actions ============================== */
 
+/** The tab whose markup is currently on screen. Scroll only resets when this
+ *  changes: re-rendering in place after a flag toggle or a delete should leave
+ *  the reader where they were, not throw them back to the top of a long log. */
+let renderedTab = null;
+
 function render() {
+  const sameTab = renderedTab === ui.tab;
+  const keepY = sameTab ? window.scrollY : 0;
   const week = E.postOpWeek(store, E.todayISO());
   const ph = E.phaseFor(store, E.todayISO());
   $('#top-right').innerHTML = `${week ? `Wk ${week} post-op<br>` : ''}${esc(ph.label)}`;
@@ -1058,7 +1065,9 @@ function render() {
   }
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
   attachTimers(document.getElementById('tab-' + ui.tab));
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  renderedTab = ui.tab;
+  // A shorter page clamps the offset on its own, so this never scrolls past the end.
+  window.scrollTo({ top: sameTab ? keepY : 0, behavior: 'instant' });
 }
 
 function saveSession() {

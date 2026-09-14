@@ -542,12 +542,21 @@ export async function ingestFiles(files, { onProgress } = {}) {
         const a = fitToActivity(messages, item.name);
         // A full export carries hundreds of settings and monitoring FITs with no
         // session message. Those are not errors and are not worth naming.
-        if (a) activities.push(a); else noSession++;
+        const why = implausible(a);
+        if (why) warnings.push(`${item.name}: skipped, ${why}.`);
+        else if (a) activities.push(a);
+        else noSession++;
       } else if (name.endsWith('.csv')) {
         const text = item.buffer ? new TextDecoder().decode(item.buffer) : await readText(item.file);
         const rows = parseCsv(text);
         let n = 0;
-        for (const r of rows) { const a = csvToActivity(r); if (a) { activities.push(a); n++; } }
+        for (const r of rows) {
+          const a = csvToActivity(r);
+          if (!a) continue;
+          const why = implausible(a);
+          if (why) { warnings.push(`${item.name}: skipped a row, ${why}.`); continue; }
+          activities.push(a); n++;
+        }
         if (!n) warnings.push(`${item.name}: no activity rows recognised.`);
       } else if (name.endsWith('.json')) {
         const text = item.buffer ? new TextDecoder().decode(item.buffer) : await readText(item.file);
@@ -568,6 +577,30 @@ export async function ingestFiles(files, { onProgress } = {}) {
   if (noWellness) warnings.push(`${noWellness} JSON file${noWellness === 1 ? '' : 's'} carried no daily wellness values, skipped.`);
   if (noSession) warnings.push(`${noSession} file${noSession === 1 ? '' : 's'} in the archive held no activity (settings and monitoring records), skipped.`);
   return { activities, daily, warnings };
+}
+
+/* ========================== plausibility check ========================== */
+
+/** Minimum believable average speed for a wheeled activity, km/h. Every real
+ *  ride in the log sits between 17 and 26; a recording left running while the
+ *  bike sat in a garage came in at 2.2. Walking, hiking and running are exempt
+ *  because their honest speeds live below this line. */
+export const MIN_RIDE_KMH = 5;
+
+const WHEELED = /cycl|bik|ride|handcycl/i;
+
+/** Why this activity should not be stored, or null if it is fine. Only judges
+ *  what it can measure: an indoor ride with no distance is left alone. */
+export function implausible(a) {
+  if (!a) return null;
+  if (!WHEELED.test(a.sport || '')) return null;
+  const hours = (a.durSec || 0) / 3600;
+  if (!hours || a.distKm == null || a.distKm <= 0) return null;
+  const kmh = a.distKm / hours;
+  if (kmh < MIN_RIDE_KMH) {
+    return `${a.distKm.toFixed(1)} km over ${Math.round(hours * 60)} min is ${kmh.toFixed(1)} km/h, below the ${MIN_RIDE_KMH} km/h floor for a ride`;
+  }
+  return null;
 }
 
 /* ============================ merge into store ============================ */

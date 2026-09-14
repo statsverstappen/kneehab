@@ -49,6 +49,8 @@ There is no Garmin API call and no OAuth. Files go in, and nothing leaves the br
 
 Re-importing is safe. Activities are keyed on start time, sport and duration; a FIT file always wins over a CSV row for the same activity, and the CSV fills any gaps the FIT left.
 
+A recording left running gets thrown out rather than stored. Any wheeled activity that covers real distance at under 5 km/h is skipped on import and named in the warnings with its reason, because an all-day file counts as one long low-power ride and can carry a few hundred TSS into the acute load. Walking, hiking and running are exempt, and so is an indoor ride reporting no distance.
+
 ## How readiness is scored
 
 Out of 100, but only over the inputs that actually have data, so it works on day one and sharpens as data arrives.

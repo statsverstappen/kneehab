@@ -4,11 +4,14 @@
 
 export const FTP_DEFAULT = 124;
 
+/* v2.3: the plan is the three rides plus the PT stack. Climbing is trained
+   off-plan and logged as Climb A / Climb B when it happens; its drill data
+   below is kept for reference but no longer rendered. */
 export const WEEK_PLAN = [
-  { dow: 1, code: 'A',  label: 'Climb A',  tag: 'Climb A + PT', sub: 'Strength & drills · ~60 min · full finisher, then PT strength stack.' },
-  { dow: 2, code: 'R1', label: 'Ride 1',   tag: 'Ride 1 · Z2',  sub: 'Z2 aerobic in ERG · 85+ rpm, stay seated · balance drills after.' },
+  { dow: 1, code: 'PT', label: 'PT',       tag: 'PT strength',  sub: 'PT strength stack · squats, lunges, RDL, step-downs · then balance drills.' },
+  { dow: 2, code: 'R1', label: 'Ride 1',   tag: 'Ride 1 · Z2',  sub: 'Z2 aerobic in ERG · 88+ rpm, stay seated · balance drills after.' },
   { dow: 3, code: null, label: 'Rest',     tag: 'Rest',         sub: 'Mobility + a 10–15 min easy walk. No training load.' },
-  { dow: 4, code: 'B',  label: 'Climb B',  tag: 'Climb B + PT', sub: 'Endurance · ~60 min · core-only finisher, then PT strength stack.' },
+  { dow: 4, code: 'PT', label: 'PT',       tag: 'PT strength',  sub: 'PT strength stack · hold loads, no progression on the same week as a flag.' },
   { dow: 5, code: 'R2', label: 'Ride 2',   tag: 'Ride 2 · SS',  sub: 'Sweet spot in ERG · 85–90 rpm, stay seated · balance drills after.' },
   { dow: 6, code: 'R3', label: 'Ride 3',   tag: 'Ride 3 · Long',sub: 'Long Z2 + cadence surges · 90 rpm base.' },
   { dow: 0, code: null, label: 'Rest',     tag: 'Rest',         sub: 'Full rest · YBT-A slot every 2–3 weeks.' }

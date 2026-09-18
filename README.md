@@ -33,6 +33,10 @@ Drop these files into the repo root, replacing `index.html`. Two things to know:
 
 The Today tab now opens with a quick log: session type preselected to today's slot, swelling and pain as tap rows, one checkbox for the 24-hour flag. The same entry can be made from a URL, `?s=1&p=2`, which is what a home-screen Shortcut opens. See `docs/quick-log.md`. Drills, the score breakdown and the gate board are folded away on Today and open with a tap.
 
+## Ride-first layout (v2.3)
+
+The plan is now the three rides plus the PT strength stack: Mon PT, Tue R1, Thu PT, Fri R2, Sat R3. Climbing is trained off-plan and logged as Climb A or Climb B from the quick log when it happens, so the 24-hour rule and swelling grades still cover it. A Rides tab shows the week's three rides with status, main-set watts at the current FTP, cadence floor and the crank torque that pairing implies, the full block table, the readiness-adapted version on an amber or red day, and the Garmin check once the ride has been imported. On a ride day the Today tab shows the same block table with no tap. The climbing drill phases, endurance blocks, finisher and movement key stay in `protocol.js` for reference but no longer render.
+
 ## Keeping devices in step
 
 Browser storage does not sync between the Mac and the phone. The app now ships `data/store.json` and merges it on every open: entries and rides in that file appear on every device, nothing local is removed, and repo settings only fill blanks. To publish new entries, export from the device that has them and commit the file as `data/store.json`. Settings has a "Sync now" button.

@@ -23,7 +23,7 @@ const DEFAULT_STORE = () => ({
 });
 
 let store = DEFAULT_STORE();
-let ui = { tab: 'today', logType: 'A', logSwell: '0', viewDay: null, expanded: {}, ql: { type: null, swell: '0', pain: '0', flag: false } };
+let ui = { tab: 'today', logType: 'R1', logSwell: '0', viewDay: null, expanded: {}, ql: { type: null, swell: '0', pain: '0', flag: false } };
 
 function loadStore() {
   let s = null;
@@ -276,14 +276,18 @@ function renderToday() {
   /* quick log: the two numbers the protocol actually runs on */
   html += quickLogCard(code, plan);
 
-  /* today's session, drills folded away */
+  /* today's session. A ride shows its full block table with no tap; the PT
+     stack stays folded because it is the same list every time. */
+  const isRide = code && P.RIDE_CODES.includes(code);
   html += `<div class="card">
     <span class="cap">Today's session</span>
     <h3 style="margin-top:4px">${esc(plan.entry?.tag || 'Rest')}</h3>
     <p class="small muted" style="margin:6px 0 0">${esc(plan.entry?.sub || '')}</p>
+    ${isRide ? rideStatLine(code) : ''}
     ${plan.note ? `<p class="small" style="color:${/✓/.test(plan.note) ? 'var(--green)' : 'var(--amber)'};margin:8px 0 0">${esc(plan.note)}</p>` : ''}
     ${adapt.length ? `<div class="notice n-${r.band}"><b>Adapted for ${r.bandLabel.toLowerCase()}</b><ul style="margin:6px 0 0;padding-left:18px">${adapt.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>` : ''}
-    ${code ? `<details class="fold"><summary>Session detail</summary>${sessionDetail(code, ph.phase)}</details>` : ''}
+    ${isRide ? sessionDetail(code, ph.phase) : code ? `<details class="fold"><summary>Session detail</summary>${sessionDetail(code, ph.phase)}</details>` : ''}
+    ${isRide ? `<div class="row" style="margin-top:12px"><button class="btn ghost" data-act="go-rides">All rides this week</button></div>` : ''}
   </div>`;
 
   /* everything else behind one fold */
@@ -316,7 +320,8 @@ function quickLogCard(code, plan) {
     ui.ql.type = (slot && !plan.logged[slot]) ? slot : (code && !plan.logged[code]) ? code : 'CHK';
   }
   const last = store.sessions.filter(s => s.date < today).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)[0] || null;
-  const types = [['CHK', 'Check-in'], ['A', 'Climb A'], ['B', 'Climb B'], ['R1', 'R1'], ['R2', 'R2'], ['R3', 'R3'], ['PT', 'PT'], ['WJ', 'Walk–jog']];
+  // rides first; climbing stays loggable even though it is off the plan
+  const types = [['CHK', 'Check-in'], ['R1', 'R1'], ['R2', 'R2'], ['R3', 'R3'], ['PT', 'PT'], ['A', 'Climb A'], ['B', 'Climb B'], ['WJ', 'Walk–jog']];
   return `<div class="card ql">
     <span class="cap">Quick log · ${E.fmtDate(today)}</span>
     <div class="seg ql-seg" data-ql="type" style="margin-top:8px">
@@ -438,6 +443,12 @@ function sessionDetail(code, phase) {
     out += `<h4 style="margin-top:14px;font-size:13px">After climbing · PT strength stack</h4>` + ptStrengthTable();
     return out;
   }
+  if (code === 'PT') {
+    return `<hr class="sep"><h4 style="font-size:13px">Strength stack</h4>${ptStrengthTable()}
+      <h4 style="margin-top:14px;font-size:13px">Balance drills</h4>
+      <div class="tbl-scroll"><table><thead><tr><th>Drill</th><th>Dose</th><th>Progression</th></tr></thead>
+        <tbody>${P.PT_BALANCE.map(b => `<tr><td>${esc(b.drill)}</td><td class="num">${esc(b.dose)}</td><td class="small muted">${esc(b.prog)}</td></tr>`).join('')}</tbody></table></div>`;
+  }
   return '';
 }
 
@@ -470,6 +481,74 @@ function ptStrengthTable() {
       <td class="num">${esc(e.dose)}</td><td class="small muted">${esc(e.note)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
+/** One line of the numbers that matter before a ride: main-set watts at the
+ *  current FTP, the cadence target and the crank torque that pairing implies. */
+function rideStatLine(code) {
+  const s = P.RIDES[code], ftp = store.settings.ftp;
+  const mainW = Math.round(ftp * s.mainPctFtp);
+  const tq = torqueNm(mainW, s.cadenceFloor + 3);
+  return `<div class="grid2 ride-stats" style="margin-top:10px">
+    <div class="stat"><b>${mainW} W</b><div class="sub">main set · ${Math.round(s.mainPctFtp * 100)}% of ${ftp} W FTP</div></div>
+    <div class="stat"><b>${esc(s.cadenceTarget.split(' ')[0])}</b><div class="sub">rpm · floor ${s.cadenceFloor}${tq ? ` · ~${tq.toFixed(1)} Nm crank torque` : ''}</div></div>
+    <div class="stat"><b>${s.totalMin} min</b><div class="sub">~${s.targetTss} TSS</div></div>
+  </div>`;
+}
+
+/* ============================== RIDES ============================== */
+
+/** The week's three rides at a glance: status, the block table in watts, the
+ *  readiness-adapted version for today, and the Garmin check when the ride
+ *  has been imported. Climbing does not appear here by design. */
+function renderRides() {
+  const today = E.todayISO();
+  const r = E.computeReadiness(store, today);
+  const ph = E.phaseFor(store, today);
+  const week = E.rideWeek(store, today);
+  const ftp = store.settings.ftp;
+  const ws = E.weekStartOf(today);
+
+  const done = week.filter(w => w.done).length;
+  let html = `<div class="card">
+    <span class="cap">Week of ${E.fmtDate(ws)}</span>
+    <div class="ride-strip" style="margin-top:8px">
+      ${week.map(w => `<div class="ride-pill ${w.done ? 'done' : w.today ? 'today' : w.missed ? 'missed' : ''}">
+        <span class="cap">${P.DAY_NAMES[w.entry.dow]}</span>
+        <b>${esc(w.code)}</b>
+        <span class="sub">${w.done ? `Done ${E.fmtDate((w.session || w.activity).date)}` : w.today ? 'Today' : w.missed ? 'Not logged' : 'Upcoming'}</span>
+      </div>`).join('')}
+    </div>
+    <p class="small muted" style="margin:10px 0 0">${done} of ${week.length} rides in. Watts are at FTP ${ftp} W${ftp === P.FTP_DEFAULT ? ', the post-op default; set your tested FTP in Settings' : ''}.
+      ${r.band !== 'green' && r.band !== 'unknown' ? `<span style="color:var(--${r.band})">Readiness is ${r.bandLabel.toLowerCase()} today, so today's ride shows its softened version.</span>` : ''}</p>
+  </div>`;
+
+  for (const w of week) {
+    const s = P.RIDES[w.code];
+    const adapt = w.today ? E.adaptFor(w.code, r.band) : [];
+    const comp = w.activity ? E.rideCompliance(w.activity, w.code, ftp) : null;
+    const status = w.done ? `<span class="chip ok">Done</span>` : w.today ? `<span class="chip key">Today</span>` : w.missed ? `<span class="chip warn">Not logged</span>` : `<span class="chip">${P.DAY_NAMES[w.entry.dow]}</span>`;
+    html += `<div class="card ride-card${w.today ? ' is-today' : ''}">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div><span class="cap">${P.DAY_NAMES[w.entry.dow]} · ${esc(w.entry.tag)}</span><h3 style="margin-top:4px">${esc(s.name)}</h3></div>
+        ${status}
+      </div>
+      <p class="small muted" style="margin:6px 0 0">${esc(w.entry.sub)}</p>
+      ${rideStatLine(w.code)}
+      ${adapt.length ? `<div class="notice n-${r.band}"><b>Adapted for ${r.bandLabel.toLowerCase()}</b><ul style="margin:6px 0 0;padding-left:18px">${adapt.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>` : ''}
+      ${sessionDetail(w.code, ph.phase)}
+      ${comp ? `<hr class="sep"><div class="cap">Garmin check · ${E.fmtDate(w.activity.date)}${w.activity.avgPower ? ` · ${n0(w.activity.avgPower)} / ${n0(w.activity.np)} W · ${n0(w.activity.avgCadence)} rpm` : ''}</div>
+        <div style="margin-top:7px">${comp.findings.map(f =>
+          `<div class="notice n-${f.level === 'warn' ? 'amber' : f.level === 'ok' ? 'green' : 'blue'}" style="margin:6px 0">${esc(f.text)}</div>`).join('')}</div>`
+        : w.done && w.session ? `<p class="small muted" style="margin:10px 0 0">Logged ${E.fmtDate(w.session.date)}${w.session.swell != null ? ` · swelling ${w.session.swell}${w.session.swell ? '+' : ''}` : ''}${w.session.pain != null ? ` · pain ${w.session.pain}` : ''}. No Garmin file for this ride yet.</p>` : ''}
+      ${!w.done ? `<div class="row" style="margin-top:12px"><button class="btn ghost" data-act="go-garmin">Import ride</button></div>` : ''}
+    </div>`;
+  }
+
+  html += `<div class="card"><span class="cap">After every ride · balance drills</span>
+    <div class="tbl-scroll" style="margin-top:8px"><table><thead><tr><th>Drill</th><th>Dose</th><th>Progression</th></tr></thead>
+      <tbody>${P.PT_BALANCE.map(b => `<tr><td>${esc(b.drill)}</td><td class="num">${esc(b.dose)}</td><td class="small muted">${esc(b.prog)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  return html;
+}
+
 /* ============================== LOG ============================== */
 
 function renderLog() {
@@ -487,7 +566,7 @@ function renderLog() {
     <label class="fld"><span class="cap">Date</span><input type="date" id="log-date" value="${today}"></label>
     <label class="fld"><span class="cap">Session</span></label>
     <div class="seg" id="type-btns">
-      ${[['A', 'A · Strength'], ['B', 'B · Endur'], ['R1', 'R1 · Z2'], ['R2', 'R2 · SS'], ['R3', 'R3 · Long'], ['PT', 'PT'], ['WJ', 'Walk–jog'], ['YBT', 'YBT-A']]
+      ${[['R1', 'R1 · Z2'], ['R2', 'R2 · SS'], ['R3', 'R3 · Long'], ['PT', 'PT'], ['A', 'Climb A'], ['B', 'Climb B'], ['WJ', 'Walk–jog'], ['YBT', 'YBT-A']]
       .map(([v, l]) => `<button data-v="${v}"${ui.logType === v ? ' class="on"' : ''}>${esc(l)}</button>`).join('')}
     </div>
     <div id="ybt-fields" class="${ui.logType === 'YBT' ? '' : 'hidden'}">
@@ -955,20 +1034,15 @@ function renderProtocol() {
         <td class="num">${P.DAY_NAMES[d.dow]}</td><td>${esc(d.label)}</td>
         <td class="small muted">${esc(d.sub)}</td></tr>`).join('')}</tbody>
     </table></div>
-    <p class="small muted" style="margin:9px 0 0">Keep 48 hours or more between the two climbing sessions.</p></div>`;
+    <p class="small muted" style="margin:9px 0 0">Climbing is trained off-plan. Log a Climb A or Climb B from the quick log when one happens so the 24-hour rule still covers it, and keep 48 hours between climbs.</p></div>`;
 
-  html += `<div class="card"><span class="cap">Movement key</span>
-    ${P.MOVEMENT_KEY.map(m => `<div class="notice n-${m.state === 'ok' ? 'green' : m.state === 'warn' ? 'amber' : 'red'}"><b>${esc(m.title)}</b>${esc(m.body)}</div>`).join('')}</div>`;
-
-  for (const p of P.PHASES) {
-    html += sec(`Phase ${p.n}`, p.weeks, `<p class="small muted">${esc(p.intro)}</p>${p.blocks.map(drillTable).join('')}`, p.n === ph.phase);
-  }
-  html += sec('Endurance', 'Session B · 15:00–40:00',
-    `<p class="small muted">${esc(P.ENDURANCE.intro)}</p>` +
-    P.ENDURANCE.byPhase.map(e => drillTable({ title: `Phase ${e.n}`, clock: '', rows: e.rows })).join(''));
-  html += sec('Finisher', 'Session A · 45:00–60:00', finisherTable(true));
+  // rides first, opened on today's ride when there is one. The climbing drill
+  // phases, endurance blocks, finisher and movement key remain in protocol.js
+  // but are no longer rendered (v2.3).
+  const todayCode = E.plannedSession(store, E.todayISO()).entry?.code;
   for (const code of P.RIDE_CODES) {
-    html += sec(P.RIDES[code].name, `${P.RIDES[code].totalMin} min · ~${P.RIDES[code].targetTss} TSS`, sessionDetail(code, ph.phase));
+    html += sec(P.RIDES[code].name, `${P.RIDES[code].totalMin} min · ~${P.RIDES[code].targetTss} TSS · ${P.RIDES[code].cadenceTarget}`,
+      rideStatLine(code) + sessionDetail(code, ph.phase), code === todayCode);
   }
   html += sec('PT · post-meniscectomy protocol', 'YBT-A gated',
     `<div class="tbl-scroll"><table><thead><tr><th>PT phase</th><th>Timeline</th><th>Runs alongside</th><th>Gate to advance</th></tr></thead>
@@ -1057,7 +1131,7 @@ function render() {
   const week = E.postOpWeek(store, E.todayISO());
   const ph = E.phaseFor(store, E.todayISO());
   $('#top-right').innerHTML = `${week ? `Wk ${week} post-op<br>` : ''}${esc(ph.label)}`;
-  const map = { today: renderToday, log: renderLog, garmin: renderGarmin, symmetry: renderSymmetry, protocol: renderProtocol, settings: renderSettings };
+  const map = { today: renderToday, rides: renderRides, log: renderLog, garmin: renderGarmin, symmetry: renderSymmetry, protocol: renderProtocol, settings: renderSettings };
   for (const t of Object.keys(map)) {
     const el = document.getElementById('tab-' + t);
     el.classList.toggle('hidden', t !== ui.tab);
@@ -1251,6 +1325,7 @@ function onClick(ev) {
 
   switch (act) {
     case 'go-log': ui.tab = 'log'; render(); break;
+    case 'go-rides': ui.tab = 'rides'; render(); break;
     case 'go-garmin': ui.tab = 'garmin'; render(); break;
     case 'save-session': saveSession(); break;
     case 'ql-save': {

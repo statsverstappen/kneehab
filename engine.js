@@ -5,7 +5,7 @@
    the day's readiness. Swelling and the 24-hour flag are the protocol's primary
    signals, so they cap the band regardless of how good HRV looks. */
 
-import { ADAPT, WEEK_PLAN, RIDES, SESSION_LABELS } from './protocol.js';
+import { ADAPT, WEEK_PLAN, RIDES, RIDE_CODES, SESSION_LABELS } from './protocol.js';
 import { torqueNm } from './garmin.js';
 
 /* ------------------------------ dates ------------------------------ */
@@ -408,26 +408,61 @@ export function computeReadiness(store, dateStr) {
 export function plannedSession(store, dateStr) {
   const ws = weekStartOf(dateStr);
   const logged = {};
-  for (const s of store.sessions) if (s.date >= ws && s.date <= dateStr) logged[s.type] = s.date;
+  const count = {};
+  for (const s of store.sessions) if (s.date >= ws && s.date <= dateStr) {
+    logged[s.type] = s.date;
+    count[s.type] = (count[s.type] || 0) + 1;
+  }
   const todayIdx = (dowOf(dateStr) + 6) % 7;
+  // a code can occupy more than one slot (PT twice a week), so slots are
+  // consumed in week order by the sessions logged under that code
   const plan = WEEK_PLAN.filter(p => p.code);
-  const pending = plan.filter(p => !logged[p.code]);
-  const overdue = pending.filter(p => (p.dow + 6) % 7 <= todayIdx);
-
+  const left = { ...count };
+  const pending = plan.filter(p => {
+    if (left[p.code] > 0) { left[p.code]--; return false; }
+    return true;
+  });
+  const entry = WEEK_PLAN.find(p => p.dow === dowOf(dateStr));
+  // today's own slot wins while it is still open. Only a rest day, or a day
+  // whose session is already in, carries an earlier unlogged session forward;
+  // otherwise an unlogged PT stack would hide the ride on a ride day.
+  if (entry?.code && pending.includes(entry)) return { entry, logged, pending, note: '' };
+  const overdue = pending.filter(p => (p.dow + 6) % 7 < todayIdx);
   if (overdue.length) {
     const p = overdue[0];
-    const late = (p.dow + 6) % 7 < todayIdx;
     return {
-      entry: p, logged,
-      note: late ? `${SESSION_LABELS[p.code]} not done yet (${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][(p.dow + 6) % 7]} slot), showing it today.` : ''
+      entry: p, logged, pending,
+      note: `${SESSION_LABELS[p.code]} not done yet (${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][(p.dow + 6) % 7]} slot), showing it today.`
     };
   }
-  const entry = WEEK_PLAN.find(p => p.dow === dowOf(dateStr));
-  const done = entry?.code && logged[entry.code];
+  const done = entry?.code && !pending.includes(entry);
   return {
-    entry, logged,
-    note: !pending.length ? 'All 5 sessions logged this week ✓' : done ? `Today's ${SESSION_LABELS[entry.code]} is logged ✓` : ''
+    entry, logged, pending,
+    note: !pending.length ? `All ${plan.length} sessions logged this week ✓` : done ? `Today's ${SESSION_LABELS[entry.code]} is logged ✓` : ''
   };
+}
+
+/** Week status for each ride slot: logged date, matched Garmin activity. */
+export function rideWeek(store, dateStr) {
+  const ws = weekStartOf(dateStr);
+  const we = shiftDate(ws, 6);
+  return WEEK_PLAN.filter(p => RIDE_CODES.includes(p.code)).map(p => {
+    const session = store.sessions
+      .filter(s => s.type === p.code && s.date >= ws && s.date <= we)
+      .sort((a, b) => a.date.localeCompare(b.date))[0] || null;
+    const acts = (store.garmin?.activities || [])
+      .filter(a => a.sport === 'cycling' && a.date >= ws && a.date <= we);
+    const activity = acts.find(a => a.date === session?.date)
+      || acts.find(a => dowOf(a.date) === p.dow)
+      || null;
+    const slotIdx = (p.dow + 6) % 7, todayIdx = (dowOf(dateStr) + 6) % 7;
+    return {
+      code: p.code, entry: p, session, activity,
+      done: !!session || !!activity,
+      today: p.dow === dowOf(dateStr),
+      missed: !session && !activity && slotIdx < todayIdx
+    };
+  });
 }
 
 export function adaptFor(code, band) {

@@ -231,3 +231,20 @@ details.card-fold > summary.card-summary{margin:14px 0 0; padding:10px 0}
 #toast{position:fixed; left:50%; bottom:22px; transform:translate(-50%, 20px); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; font-size:13.5px; max-width:min(92vw, 460px); opacity:0; pointer-events:none; transition:.25s; z-index:50; box-shadow:0 8px 30px rgba(0,0,0,.4)}
 #toast.on{opacity:1; transform:translate(-50%, 0)}
 code{font-family:var(--mono); font-size:12px; color:var(--blue)}
+
+/* ---------- rides tab (v2.3) ---------- */
+.ride-strip{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.ride-pill{background:var(--card-2); border:1px solid var(--line); border-radius:9px; padding:10px 12px; text-align:center}
+.ride-pill b{display:block; font-family:var(--disp); font-size:22px; line-height:1.1; margin-top:3px}
+.ride-pill .sub{display:block; font-size:11.5px; color:var(--ink-soft); margin-top:3px}
+.ride-pill.done{border-color:var(--green); }
+.ride-pill.done b{color:var(--green)}
+.ride-pill.today{border-color:var(--blue); background:var(--blue-soft)}
+.ride-pill.today b{color:var(--blue)}
+.ride-pill.missed{border-color:var(--amber)}
+.ride-pill.missed b{color:var(--amber)}
+.ride-card.is-today{border-color:var(--blue)}
+.ride-stats{grid-template-columns:repeat(3,1fr); gap:8px}
+.ride-stats .stat{padding:10px 9px}
+.ride-stats .stat .sub{font-size:11px}
+.ride-stats .stat b{font-size:20px}

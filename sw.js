@@ -2,7 +2,7 @@
    Cache-first for the app shell so a session works with no signal at the gym,
    with a background refresh so a deploy is picked up on the next load. */
 
-const CACHE = 'kneehab-v2-3';
+const CACHE = 'kneehab-v2-4';
 const ASSETS = [
   './',
   './index.html',

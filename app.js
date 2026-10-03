@@ -559,7 +559,8 @@ function renderLog() {
   const wk = data.filter(e => e.date >= ws);
   const wkClimb = wk.filter(e => e.type === 'A' || e.type === 'B').length;
   const wkBike = wk.filter(e => String(e.type)[0] === 'R').length;
-  const last5 = data.slice(0, 5);
+  // Last five sessions with a pain rating; unrated Garmin rides are not zero pain.
+  const last5 = data.filter(e => e.pain != null && e.pain !== '').slice(0, 5);
 
   return `<div class="card">
     <span class="cap">Log a session</span>

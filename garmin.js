@@ -11,6 +11,9 @@ import { decodeFit, SPORT } from './fit.js';
 /* ============================== helpers ============================== */
 
 export const iso = d => {
+  // A bare calendar date is already local. new Date('YYYY-MM-DD') would parse
+  // it as UTC midnight and land a day early in US time zones.
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
   const dt = (d instanceof Date) ? d : new Date(d);
   if (isNaN(dt)) return null;
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
@@ -401,7 +404,9 @@ function summarizeRecords(recs) {
       const t = torqueNm(r.power, r.cadence);
       if (t != null) torques.push(t);
     }
-    if (r.left_right_balance != null) balances.push(r.left_right_balance);
+    // Garmin writes a 0/100 balance while coasting; only pedalling samples count.
+    const lrb = r.left_right_balance;
+    if (lrb != null && r.power > 0 && lrb > 0 && lrb < 100) balances.push(lrb);
     n++;
   }
   const sorted = torques.slice().sort((x, y) => x - y);
@@ -612,10 +617,13 @@ export function mergeActivities(existing, incoming) {
   for (const a of incoming) {
     const cur = byId.get(a.id);
     if (!cur) { byId.set(a.id, a); added++; continue; }
-    const winner = (a.source === 'fit' && cur.source !== 'fit') ? { ...cur, ...strip(a) } : { ...a, ...strip(cur) };
+    // The new copy wins unless it is a summary (CSV/JSON) arriving over a FIT,
+    // so re-importing a FIT refreshes it with the current parser.
+    const newWins = a.source === 'fit' || a.source === cur.source;
+    const winner = newWins ? { ...cur, ...strip(a) } : { ...a, ...strip(cur) };
     winner.id = a.id;
     byId.set(a.id, winner);
-    updated++;
+    if (JSON.stringify(winner) !== JSON.stringify(cur)) updated++;
   }
   return { list: [...byId.values()].sort((x, y) => (x.startISO || '').localeCompare(y.startISO || '')), added, updated };
 }

@@ -350,7 +350,11 @@ export function computeReadiness(store, dateStr) {
 
   /* 4. Load */
   const acwr = computeAcwr(store.garmin.activities, ftp, dateStr);
-  if (acwr.ratio != null && acwr.chronic >= 15) {
+  // The chronic side is a 28-day average, so it means nothing until four weeks
+  // of rides exist; before that one import reads as a load spike.
+  const firstRide = store.garmin.activities.reduce((m, a) => (a.date && (!m || a.date < m)) ? a.date : m, null);
+  const fullHistory = firstRide != null && firstRide <= shiftDate(dateStr, -27);
+  if (acwr.ratio != null && acwr.chronic >= 15 && fullHistory) {
     const r = acwr.ratio;
     const pts = r < 0.8 ? 16 : r <= 1.3 ? 20 : r <= 1.5 ? 12 : 4;
     comps.push({
@@ -369,15 +373,17 @@ export function computeReadiness(store, dateStr) {
   const coverage = available / comps.reduce((s, c) => s + c.max, 0);
 
   // Too little of today's picture to call it. Better to say so than to publish a
-  // confident green off one stale input.
-  const THIN = 0.35;
+  // confident green off one stale input. Recent swelling plus pain (0.30) is
+  // enough on its own, so the knee log scores from day one without Garmin data.
+  const THIN = 0.3;
   let band = (score == null || coverage < THIN) ? 'unknown'
     : score >= 75 ? 'green' : score >= 55 ? 'amber' : 'red';
   const overrides = [];
   if (score != null && coverage < THIN) {
     overrides.push({ level: 'blue', text: 'Not enough of today to score it. Log a session, or import a Garmin file, and the score fills in.' });
   }
-  const cap = b => { if (b === 'red') band = 'red'; else if (band === 'green') band = 'amber'; };
+  // An amber warning also applies when there is too little data to score.
+  const cap = b => { if (b === 'red') band = 'red'; else if (band === 'green' || band === 'unknown') band = 'amber'; };
 
   if (knee.swellMax48h != null && knee.swellMax48h >= 3) {
     band = 'red';

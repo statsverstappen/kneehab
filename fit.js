@@ -77,11 +77,13 @@ const PROFILE = {
     fields: {
       253: f('timestamp', null, null, 'date'), 2: f('start_time', null, null, 'date'),
       7: f('total_elapsed_time', 1000), 8: f('total_timer_time', 1000), 9: f('total_distance', 100),
-      13: f('avg_heart_rate'), 16: f('avg_heart_rate'), 17: f('max_heart_rate'),
-      18: f('avg_cadence'), 19: f('max_cadence'), 20: f('avg_power'), 21: f('max_power'),
-      24: f('intensity'), 33: f('normalized_power'),
+      13: f('avg_speed', 1000), 14: f('max_speed', 1000),
+      15: f('avg_heart_rate'), 16: f('max_heart_rate'),
+      17: f('avg_cadence'), 18: f('max_cadence'), 19: f('avg_power'), 20: f('max_power'),
+      21: f('total_ascent'), 22: f('total_descent'), 23: f('intensity'),
+      24: f('lap_trigger'), 25: f('sport'), 26: f('event_group'), 33: f('normalized_power'),
       34: f('left_right_balance', null, null, 'lrb100'),
-      25: f('event_group'), 254: f('message_index')
+      254: f('message_index')
     }
   },
   20: {
